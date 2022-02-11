@@ -19,3 +19,13 @@ GroupTable = Table(
     Column("groupName", String),
 )
 
+
+class DataManager:
+
+    async def addGroupMessage(self):
+        ...
+
+    async def addFriendMessage(self):
+        ...
+
+dataManager = DataManager()
