@@ -20,3 +20,13 @@ saya.require("WapQQ")
 `pip install -r saya/WapQQ/requirements.txt`
 
 ~~什么，为什么不用`poetry`之类的？别问，问就是懒狗。~~
+
+## 配置
+如果选择直接使用本项目，请先按该文件内的要求编辑`config/config.yaml.sample`
+
+IP 和 端口号的配置在`saya/WapQQ/web/config.py`内
+默认为`localhost:8888`
+
+如果一切准备就绪，请访问`http://localhost:8888/qq`
+
+
