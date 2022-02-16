@@ -10,58 +10,65 @@
     <meta name="referrer" content="never">
     <style>
         .chat-sender {
-            color: rgb(42,0,255);
+            color: rgb(42, 0, 255);
         }
+
         .id {
             color: #579ffb;
         }
+
         .chat-image {
             max-width: 200px;
         }
-         .chat-block {
-            position:relative;
+
+        .chat-block {
+            position: relative;
             left: 8px;
             border: 1px solid #ccc;
             border-radius: 8px;
-            background-color: rgb(229,227,225);
+            background-color: rgb(229, 227, 225);
             display: inline-block;
             padding: 10px;
             min-height: 16px;
         }
+
         .chat-block .arrow {
-            position:absolute;
-            top:5px;
-            left:-16px;
-            width:0;
-            height:0;
-            font-size:0;
-            border:solid 8px;
-            border-color:rgb(229,227,225) rgb(229,227,225) rgb(255,253,251) rgb(255,253,251);
+            position: absolute;
+            top: 5px;
+            left: -16px;
+            width: 0;
+            height: 0;
+            font-size: 0;
+            border: solid 8px;
+            border-color: rgb(229, 227, 225) rgb(229, 227, 225) rgb(255, 253, 251) rgb(255, 253, 251);
         }
+
         .chat-sender-self {
             text-align: left;
-            color: rgb(0,128,64);
+            color: rgb(0, 128, 64);
         }
+
         .chat-block-self {
             text-align: left;
-            position:relative;
+            position: relative;
             left: 8px;
             border: 1px solid #ccc;
             border-radius: 8px;
-            background-color: rgb(18,183,245);
+            background-color: rgb(18, 183, 245);
             display: inline-block;
             padding: 10px;
             min-height: 16px;
         }
+
         .chat-block-self .arrow {
-            position:absolute;
-            top:5px;
-            right:-16px;
-            width:0;
-            height:0;
-            font-size:0;
-            border:solid 8px;
-            border-color:rgb(18,183,245) rgb(255,253,251) rgb(255,253,251) rgb(18,183,245);
+            position: absolute;
+            top: 5px;
+            right: -16px;
+            width: 0;
+            height: 0;
+            font-size: 0;
+            border: solid 8px;
+            border-color: rgb(18, 183, 245) rgb(255, 253, 251) rgb(255, 253, 251) rgb(18, 183, 245);
         }
     </style>
 </head>
@@ -78,7 +85,8 @@
     <br>
     <a href="/qq">返回主页</a>
 
-    <form method="post" action="/qq/send_{{ type }}_message/{% if type == 'group' %}{{ group_id }}{% elif type == 'friend' %}{{ friend_id }}{% endif %}">
+    <form method="post" action="/qq/send_{{ type }}_message/
+            {% if type == 'group' %}{{ group_id }}{% elif type == 'friend' %}{{ friend_id }}{% endif %}">
         消息:<br>
         <label>
             <input type="text" name="message">
@@ -91,40 +99,42 @@
         暂无缓存消息！
     {% else %}
         {% for i in messageContainer_list %}
-                {% if i.sender_id != account %}
-                <div class="chat-sender">{{ i.sender_name }}(<span class="id">{{ i.sender_id }}</span>) {{ i.time }}</div>
+            {% if i.sender_id != account %}
+                <div class="chat-sender">{{ i.sender_name }}(<span class="id">{{ i.sender_id }}</span>) {{ i.time }}
+                </div>
                 <div class="chat-block">
-                <div class="arrow"></div>
-                {% for j in i.message %}
-                    {% if j["type"] == "Plain" %}
-                        {{ j["text"] }}
-                    {% elif j["type"] == "Image" %}
-                        <img src="{{ j["url"] }}" alt="图片" class="chat-image">
-                    {% elif j["type"] == "At" %}
-                        @{{ j["targetId"] }}
-                    {% elif j["type"] == "Quote" %}
-                        回复 {{ j["targetId"] }}
-                    {% endif %}
-                {% endfor %}
+                    <div class="arrow"></div>
+                    {% for j in i.message %}
+                        {% if j["type"] == "Plain" %}
+                            {{ j["text"] }}
+                        {% elif j["type"] == "Image" %}
+                            <img src="{{ j["url"] }}" alt="图片" class="chat-image">
+                        {% elif j["type"] == "At" %}
+                            @{{ j["targetId"] }}
+                        {% elif j["type"] == "Quote" %}
+                            回复 {{ j["targetId"] }}
+                        {% endif %}
+                    {% endfor %}
                 </div>
             {% else %}
-                <div class="chat-sender-self">{{ i.sender_name }}(<span class="id">{{ i.sender_id }}</span>) {{ i.time }}</div>
+                <div class="chat-sender-self">{{ i.sender_name }}(<span
+                        class="id">{{ i.sender_id }}</span>) {{ i.time }}</div>
                 <div class="chat-block-self">
-                <div class="arrow"></div>
-                {% for j in i.message %}
-                    {% if j["type"] == "Plain" %}
-                        {{ j["text"] }}
-                    {% elif j["type"] == "Image" %}
-                        <img src="{{ j["url"] }}" alt="图片" class="chat-image">
-                    {% elif j["type"] == "At" %}
-                        @{{ j["targetId"] }}
-                    {% elif j["type"] == "Quote" %}
-                        对 {{ j["targetId"] }} 的回复
-                    {% endif %}
-                {% endfor %}
+                    <div class="arrow"></div>
+                    {% for j in i.message %}
+                        {% if j["type"] == "Plain" %}
+                            {{ j["text"] }}
+                        {% elif j["type"] == "Image" %}
+                            <img src="{{ j["url"] }}" alt="图片" class="chat-image">
+                        {% elif j["type"] == "At" %}
+                            @{{ j["targetId"] }}
+                        {% elif j["type"] == "Quote" %}
+                            对 {{ j["targetId"] }} 的回复
+                        {% endif %}
+                    {% endfor %}
                 </div>
             {% endif %}
-                <br>
+            <br>
         {% endfor %}
     {% endif %}
 
