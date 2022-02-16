@@ -110,7 +110,7 @@
                         {% elif j["type"] == "Image" %}
                             <img src="{{ j["url"] }}" alt="图片" class="chat-image">
                         {% elif j["type"] == "At" %}
-                            @{{ j["targetId"] }}
+                            @<span class="id">{{ j["target"] }}</span>
                         {% elif j["type"] == "Quote" %}
                             回复 {{ j["targetId"] }}
                         {% endif %}
