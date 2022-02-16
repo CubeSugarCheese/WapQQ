@@ -1,12 +1,13 @@
-from asyncio import AbstractEventLoop
-
 from graia.ariadne.event.lifecycle import ApplicationLaunched, ApplicationShutdowned
 from graia.ariadne.event.message import GroupMessage, FriendMessage
+from graia.ariadne.app import Ariadne
 
 from graia.saya import Channel
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-from .dataBase import DataManager
+from .dataBase import dataManager
+
+from .web import launch_webserver, stop_webserver
 
 channel = Channel.current()
 
@@ -14,19 +15,20 @@ channel.name("WapQQ")
 channel.description("简单的WebQQ实现")
 channel.author("Cubesugarcheese")
 
-dataManager: DataManager
+
+app: Ariadne
 
 
 @channel.use(ListenerSchema(listening_events=[ApplicationLaunched]))
-async def launch(loop: AbstractEventLoop):
-    global dataManager
-    dataManager = DataManager(loop=loop)
+async def launch(app: Ariadne):
     await dataManager.startup()
+    await launch_webserver(app)
 
 
 @channel.use(ListenerSchema(listening_events=[ApplicationShutdowned]))
 async def stop():
     await dataManager.shutdown()
+    await stop_webserver()
 
 
 @channel.use(ListenerSchema(listening_events=[GroupMessage]))

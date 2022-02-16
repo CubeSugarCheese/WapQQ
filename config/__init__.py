@@ -14,8 +14,8 @@ class Config:
         self.load_config()
 
     def load_config(self):
-        with Path("config\config.yaml").open("r") as f:
-            config_ = yaml.load(f)
+        with Path("config/config.yaml").open("r") as f:
+            config_ = yaml.safe_load(f)
             if not config_["init"] is True:
                 logger.critical("你还没有完成设置！请将 init 设置为 true！")
                 quit()

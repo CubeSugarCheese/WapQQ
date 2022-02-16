@@ -32,6 +32,7 @@ FriendMessageTable = Table(
     metadata,
     Column("_id", Integer, primary_key=True),
     Column("senderID", Integer),
+    Column("friendID", Integer),
     Column("timestamp", Float),
     Column("context", String)
 )

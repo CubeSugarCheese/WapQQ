@@ -8,7 +8,6 @@ from graia.saya.builtins.broadcast import BroadcastBehaviour
 from loguru import logger
 from graia.broadcast import Broadcast
 from graia.saya import Saya
-from graia.ariadne.adapter import DefaultAdapter
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import MiraiSession
 
@@ -26,7 +25,7 @@ logger.add(
     compression="tar.xz",
     colorize=False,
 )
-logger.info("ABot is starting...")
+logger.info("Bot is starting...")
 
 ignore = ["__init__.py", "__pycache__"]
 

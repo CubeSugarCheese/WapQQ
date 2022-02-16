@@ -1,3 +1,7 @@
 sqlalchemy
 databases[sqlite]
 pydantic
+uvicorn
+sanic
+loguru
+
