@@ -7,9 +7,9 @@
 
 ### 作为`Saya`插件加载
 加载`saya`目录下的`WapQQ`目录即可
-"""python
+```python
 saya.require("WapQQ")
-"""
+```
 
 ### 直接部署
 本项目提供了一个实例机器人，直接使用即可
