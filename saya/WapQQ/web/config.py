@@ -1,3 +1,3 @@
-host = "192.168.123.224"
-port = 10002
+host = "localhost"
+port = 8888
 use_image_proxy = True
