@@ -3,7 +3,6 @@ from asyncio import Task
 
 from graia.ariadne.app import Ariadne
 from uvicorn import Config
-from uvicorn.server import Server
 
 from .config import host, port
 from .utils import rewrite_logging_logger, rewrite_ariadne_logger, ModifiedServer
@@ -23,7 +22,7 @@ application: Ariadne
 
 async def launch_webserver(app: Ariadne):
     global server, task, application
-    server = Server(Config(sanic, host=host, port=port, log_config=None, reload=False))
+    server = ModifiedServer(Config(sanic, host=host, port=port, log_config=None, reload=False))
     task = asyncio.create_task(server.serve())
     application = app
     await setApplication(app)

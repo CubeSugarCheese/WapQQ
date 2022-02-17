@@ -102,6 +102,8 @@ class ModifiedServer(Server):
 
         self.lifespan = config.lifespan_class(config)
 
+        # self.install_signal_handlers()
+
         message = "Started server process [%d]"
         color_message = "Started server process [" + click.style("%d", fg="cyan") + "]"
         logger.info(message, process_id, extra={"color_message": color_message})
