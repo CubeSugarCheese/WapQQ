@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh" style="background-color: rgb(255,253,251)">
 <head>
-    <title>WabQQ(
-        {% if type == 'friend' %}好友:{{ friend_name }}
-        {% elif type == 'group' %}群:{{ group_name }})
-        {% endif %}
-        )</title>
+    <title>WabQQ({% if type == 'friend' %}好友:{{ friend_name }}{% elif type == 'group' %}群:{{ group_name }}){% endif %})</title>
     <meta charset="utf-8">
     <meta name="referrer" content="never">
     <style>
@@ -23,7 +19,7 @@
 
         .chat-block {
             position: relative;
-            left: 8px;
+            left: 24px;
             border: 1px solid #ccc;
             border-radius: 8px;
             background-color: rgb(229, 227, 225);
@@ -51,7 +47,7 @@
         .chat-block-self {
             text-align: left;
             position: relative;
-            left: 8px;
+            left: 24px;
             border: 1px solid #ccc;
             border-radius: 8px;
             background-color: rgb(18, 183, 245);
@@ -98,42 +94,46 @@
         暂无缓存消息！
     {% else %}
         {% for i in messageContainer_list %}
-            {% if i.sender_id != account %}
-                <div class="chat-sender">{{ i.sender_name }}(<span class="id">{{ i.sender_id }}</span>) {{ i.time }}
-                </div>
-                <div class="chat-block">
+                <div class="{% if i.sender_id != account %}chat-sender{% else %}chat-sender-self{% endif %}">{{ i.sender_name }}(<span class="id">{{ i.sender_id }}</span>) {{ i.time }}</div>
+                <div class="{% if i.sender_id != account %}chat-block{% else %}chat-block-self{% endif %}">
                     <div class="arrow"></div>
                     {% for j in i.message %}
-                        {% if j["type"] == "Plain" %}
-                            {{ j["text"] }}
-                        {% elif j["type"] == "Image" %}
+                        {% if j.type == "Plain" %}
+                            {{ j.text }}
+                        {% elif j.type == "Image" %}
                             <img src="{{ j["url"] }}" alt="图片" class="chat-image">
-                        {% elif j["type"] == "At" %}
+                        {% elif j.type == "At" %}
                             @<span class="id">{{ j["target"] }}</span>
-                        {% elif j["type"] == "Quote" %}
+                        {% elif j.type == "Quote" %}
                             回复 {{ j["targetId"] }}
+                        {% elif j.type == "Face" %}
+                            {{ j.asDisplay() }}
+                        {% elif j.type == "MarketFace" %}
+                            {{ j.asDisplay() }}
+                        {% elif j.type == "Xml" %}
+                            {{ j.asDisplay() }}<br>
+                            {{ j.xml }}
+                        {% elif j.type == "Json" %}
+                            {{ j.asDisplay() }}<br>
+                            {{ j.Json }}
+                        {% elif j.type == "App" %}
+                            {{ j.asDisplay() }}<br>
+                            {{ j.content }}
+                        {% elif j.type == "MusicShare" %}
+                            {{ j.asDisplay() }}
+                        {% elif j.type == "Dice" %}
+                            {{ j.asDisplay() }}
+                        {% elif j.type == "File" %}
+                            {{ j.asDisplay() }}
+                        {% elif j.type == "Forward" %}
+                            [合并转发]该消息不支持查看{{ j.type }}
+                        {% else %}
+                            {{ j.type }}<br>
+                            {{ j.asDisplay() }}
                         {% endif %}
                     {% endfor %}
                 </div>
-            {% else %}
-                <div class="chat-sender-self">{{ i.sender_name }}(<span
-                        class="id">{{ i.sender_id }}</span>) {{ i.time }}</div>
-                <div class="chat-block-self">
-                    <div class="arrow"></div>
-                    {% for j in i.message %}
-                        {% if j["type"] == "Plain" %}
-                            {{ j["text"] }}
-                        {% elif j["type"] == "Image" %}
-                            <img src="{{ j["url"] }}" alt="图片" class="chat-image">
-                        {% elif j["type"] == "At" %}
-                            @{{ j["targetId"] }}
-                        {% elif j["type"] == "Quote" %}
-                            对 {{ j["targetId"] }} 的回复
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            {% endif %}
-            <br>
+                <br>
         {% endfor %}
     {% endif %}
 
