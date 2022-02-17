@@ -119,7 +119,8 @@ async def image_proxy(request: Request, url: str, max_width: int = 200, max_heig
         imgs: List[Image.Image] = [frame.copy() for frame in ImageSequence.Iterator(image)]
         gif_frames: List = []
         for i in imgs:
-            gif_frames.append(i.thumbnail((max_width, max_height)))
+            i.thumbnail((max_width, max_height))
+            gif_frames.append(i)
         send_image = BytesIO()
         gif_frames[0].save(
             send_image,
