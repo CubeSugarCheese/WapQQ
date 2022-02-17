@@ -131,7 +131,11 @@ async def image_proxy(request: Request, url: str, max_width: int = 200, max_heig
             loop=0,
             optimize=False,
         )
-    else:
+    elif image.mode == "RGBA":
+        image.thumbnail((max_width, max_height))
+        send_image = BytesIO()
+        image.save(send_image, format="PNG")
+    elif image.mode == "RGB":
         image.thumbnail((max_width, max_height))
         send_image = BytesIO()
         image.save(send_image, format="JPEG")
