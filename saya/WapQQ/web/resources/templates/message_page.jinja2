@@ -85,8 +85,7 @@
     <br>
     <a href="/qq">返回主页</a>
 
-    <form method="post" action="/qq/send_{{ type }}_message/
-            {% if type == 'group' %}{{ group_id }}{% elif type == 'friend' %}{{ friend_id }}{% endif %}">
+    <form method="post" action="/qq/send_{{ type }}_message/{% if type == 'group' %}{{ group_id }}{% elif type == 'friend' %}{{ friend_id }}{% endif %}">
         消息:<br>
         <label>
             <input type="text" name="message">
