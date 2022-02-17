@@ -101,7 +101,7 @@
                         {% if j.type == "Plain" %}
                             {{ j.text }}
                         {% elif j.type == "Image" %}
-                            <img src="{{ j["url"] }}" alt="图片" class="chat-image">
+                            {% if use_image_proxy %}<img src="/qq/image_proxy/{{ j["url"] }}" alt="图片" class="chat-image">{% else %}<img src="{{ j["url"] }}" alt="图片" class="chat-image">{% endif %}
                         {% elif j.type == "At" %}
                             @<span class="id">{{ j["target"] }}</span>
                         {% elif j.type == "Quote" %}

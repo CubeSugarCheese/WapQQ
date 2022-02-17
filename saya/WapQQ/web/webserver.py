@@ -1,11 +1,16 @@
 from pathlib import Path
+from io import BytesIO
+from typing import List
+from PIL import Image, ImageSequence
 
 from graia.ariadne.app import Ariadne
 from graia.ariadne.message.chain import MessageChain
 from sanic import Sanic, Request, html, HTTPResponse
-from sanic.response import redirect
+from sanic.response import redirect, raw
+from httpx import AsyncClient
 
 from .utils import render_template
+from .config import use_image_proxy
 from ..dataBase import dataManager
 
 current_path = Path(__file__).parents[0]
@@ -51,7 +56,8 @@ async def show_group_page(request: Request, group_id: int) -> HTTPResponse:
     message_container_list = await dataManager.getGroupMessage(current_group)
     template = await render_template("message_page.jinja2", messageContainer_list=message_container_list,
                                      group_name=current_group.name, group_id=group_id, type='group',
-                                     status=status, account=application.account)
+                                     status=status, account=application.account,
+                                     use_image_proxy=use_image_proxy)
     return html(template)
 
 
@@ -71,7 +77,8 @@ async def show_friend_page(request: Request, friend_id: int) -> HTTPResponse:
     message_container_list = await dataManager.getFriendMessage(current_friend)
     template = await render_template("message_page.jinja2", messageContainer_list=message_container_list,
                                      friend_name=current_friend.nickname, friend_id=friend_id, type='friend',
-                                     status=status, account=application.account)
+                                     status=status, account=application.account,
+                                     use_image_proxy=use_image_proxy)
     return html(template)
 
 
@@ -99,3 +106,32 @@ async def send_friend_message(request: Request, friend_id: int):
     await dataManager.addBotFriendMessage(bot_message, friend_id)
     await dataManager.updateBotAccountName()
     return redirect(f"/qq/friend/{friend_id}")
+
+
+@sanic.get(r"/qq/image_proxy/http%3A/<url:path>")
+async def image_proxy(request: Request, url: str, max_width: int = 200, max_height: int = 200):
+    url = "http:/" + url
+    async with AsyncClient() as client:
+        r = await client.get(url)
+    image = Image.open(BytesIO(r.content))
+    if image.mode == "P":
+        # Gif
+        imgs: List[Image.Image] = [frame.copy() for frame in ImageSequence.Iterator(image)]
+        gif_frames: List = []
+        for i in imgs:
+            gif_frames.append(i.thumbnail((max_width, max_height)))
+        send_image = BytesIO()
+        gif_frames[0].save(
+            send_image,
+            format="GIF",
+            append_images=gif_frames[1:],
+            save_all=True,
+            duration=60,
+            loop=0,
+            optimize=False,
+        )
+    else:
+        image.thumbnail((max_width, max_height))
+        send_image = BytesIO()
+        image.save(send_image, format="JPEG")
+    return raw(send_image.getvalue(), content_type="image/jpeg")
