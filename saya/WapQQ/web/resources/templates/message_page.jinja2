@@ -18,6 +18,7 @@
         }
 
         .chat-block {
+            white-space: pre-line;
             position: relative;
             left: 24px;
             border: 1px solid #ccc;
@@ -45,6 +46,7 @@
         }
 
         .chat-block-self {
+            white-space: pre-line;
             text-align: left;
             position: relative;
             left: 24px;
@@ -94,46 +96,44 @@
         暂无缓存消息！
     {% else %}
         {% for i in messageContainer_list %}
-                <div class="{% if i.sender_id != account %}chat-sender{% else %}chat-sender-self{% endif %}">{{ i.sender_name }}(<span class="id">{{ i.sender_id }}</span>) {{ i.time }}</div>
-                <div class="{% if i.sender_id != account %}chat-block{% else %}chat-block-self{% endif %}">
-                    <div class="arrow"></div>
-                    {% for j in i.message %}
-                        {% if j.type == "Plain" %}
-                            {{ j.text }}
-                        {% elif j.type == "Image" %}
-                            {% if use_image_proxy %}<img src="/qq/image_proxy/{{ j["url"] }}" alt="图片" class="chat-image">{% else %}<img src="{{ j["url"] }}" alt="图片" class="chat-image">{% endif %}
-                        {% elif j.type == "At" %}
-                            @<span class="id">{{ j["target"] }}</span>
-                        {% elif j.type == "Quote" %}
-                            回复 {{ j["targetId"] }}
-                        {% elif j.type == "Face" %}
-                            {{ j.asDisplay() }}
-                        {% elif j.type == "MarketFace" %}
-                            {{ j.asDisplay() }}
-                        {% elif j.type == "Xml" %}
-                            {{ j.asDisplay() }}<br>
-                            {{ j.xml }}
-                        {% elif j.type == "Json" %}
-                            {{ j.asDisplay() }}<br>
-                            {{ j.Json }}
-                        {% elif j.type == "App" %}
-                            {{ j.asDisplay() }}<br>
-                            {{ j.content }}
-                        {% elif j.type == "MusicShare" %}
-                            {{ j.asDisplay() }}
-                        {% elif j.type == "Dice" %}
-                            {{ j.asDisplay() }}
-                        {% elif j.type == "File" %}
-                            {{ j.asDisplay() }}
-                        {% elif j.type == "Forward" %}
-                            [合并转发]该消息不支持查看{{ j.type }}
-                        {% else %}
-                            {{ j.type }}<br>
-                            {{ j.asDisplay() }}
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                <br>
+            <div class="{% if i.sender_id != account %}chat-sender{% else %}chat-sender-self{% endif %}">
+                {{ i.sender_name }}(<span class="id">{{ i.sender_id }}</span>) {{ i.time }}
+            </div>
+            <div class="{% if i.sender_id != account %}chat-block{% else %}chat-block-self{% endif %}"><div class="arrow"></div>
+                {%- for j in i.message -%}
+                    {%- if j.type == "Plain" -%}
+                        {{ j.text }}
+                    {%- elif j.type == "Image" -%}
+                        {% if use_image_proxy %}<img src="/qq/image_proxy/{{ j["url"] }}" alt="图片" class="chat-image">{% else %}<img src="{{ j["url"] }}" alt="图片" class="chat-image">{% endif %}
+                    {%- elif j.type == "At" -%}
+                        @<span class="id">{{ j["target"] }}</span>
+                    {%- elif j.type == "Quote" -%}
+                        回复 {{ j["targetId"] }}
+                    {%- elif j.type == "Face" -%}
+                        {{ j.asDisplay() }}
+                    {%- elif j.type == "MarketFace" -%}
+                        {{ j.asDisplay() }}
+                    {%- elif j.type == "Xml" -%}
+                        {{ j.asDisplay() }}<br>
+                        {{ j.xml }}
+                    {%- elif j.type == "Json" -%}
+                        {{ j.asDisplay() }}<br>
+                        {{ j.Json }}
+                    {%- elif j.type == "App" -%}
+                        {{ j.asDisplay() }}<br>
+                        {{ j.content }}
+                    {%- elif j.type == "MusicShare" -%}
+                        {{ j.asDisplay() }}
+                    {%- elif j.type == "Dice" -%}
+                        {{ j.asDisplay() }}
+                    {%- elif j.type == "File" -%}
+                        {{ j.asDisplay() }}
+                    {%- elif j.type == "Forward" -%}
+                        [合并转发]该消息不支持查看{{ j.type }}
+                    {%- else -%}{{ j.type }}<br>{{ j.asDisplay() }}
+                    {%- endif %}
+                {%- endfor %}</div>
+            <br>
         {% endfor %}
     {% endif %}
 
