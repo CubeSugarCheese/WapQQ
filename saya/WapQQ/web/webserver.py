@@ -1,16 +1,16 @@
-from pathlib import Path
 from io import BytesIO
+from pathlib import Path
 from typing import List
-from PIL import Image, ImageSequence
 
+from PIL import Image, ImageSequence
 from graia.ariadne.app import Ariadne
 from graia.ariadne.message.chain import MessageChain
+from httpx import AsyncClient
 from sanic import Sanic, Request, html, HTTPResponse
 from sanic.response import redirect, raw
-from httpx import AsyncClient
 
-from .utils import render_template
 from .config import use_image_proxy
+from .utils import render_template
 from ..dataBase import dataManager
 
 current_path = Path(__file__).parents[0]
@@ -114,10 +114,11 @@ async def image_proxy(request: Request, url: str, max_width: int = 200, max_heig
     async with AsyncClient() as client:
         r = await client.get(url)
     image = Image.open(BytesIO(r.content))
-    if image.mode == "P":
+    img_format = "image/jpeg"
+    if image.mode == "P":  # ['1', 'L', 'I', 'F', 'P', 'RGB', 'RGBA', 'CMYK', 'YCbCr' ]
         # Gif
         imgs: List[Image.Image] = [frame.copy() for frame in ImageSequence.Iterator(image)]
-        gif_frames: List = []
+        gif_frames: List[Image.Image] = []
         for i in imgs:
             i.thumbnail((max_width, max_height))
             gif_frames.append(i)
@@ -130,13 +131,17 @@ async def image_proxy(request: Request, url: str, max_width: int = 200, max_heig
             duration=60,
             loop=0,
             optimize=False,
+            quality=100
         )
+        img_format = "image/gif"
     elif image.mode == "RGBA":
         image.thumbnail((max_width, max_height))
         send_image = BytesIO()
         image.save(send_image, format="PNG")
-    elif image.mode == "RGB":
+        img_format = "image/png"
+    else:
         image.thumbnail((max_width, max_height))
         send_image = BytesIO()
         image.save(send_image, format="JPEG")
-    return raw(send_image.getvalue(), content_type="image/jpeg")
+        img_format = "image/jpeg"
+    return raw(send_image.getvalue(), content_type=img_format)
