@@ -9,7 +9,7 @@ from httpx import AsyncClient
 from sanic import Sanic, Request, html, HTTPResponse
 from sanic.response import redirect, raw
 
-from .config import use_image_proxy
+from .config import use_image_proxy, max_height, max_width, chat_limit
 from .utils import render_template
 from ..dataBase import dataManager
 
@@ -53,7 +53,7 @@ async def show_group_page(request: Request, group_id: int) -> HTTPResponse:
             break
     if status == "error":
         return html(await render_template("message_page.jinja2", status=status))
-    message_container_list = await dataManager.getGroupMessage(current_group)
+    message_container_list = await dataManager.getGroupMessage(current_group, limit=chat_limit)
     template = await render_template("message_page.jinja2", messageContainer_list=message_container_list,
                                      group_name=current_group.name, group_id=group_id, type='group',
                                      status=status, account=application.account,
@@ -109,12 +109,11 @@ async def send_friend_message(request: Request, friend_id: int):
 
 
 @sanic.get(r"/qq/image_proxy/http%3A/<url:path>")
-async def image_proxy(request: Request, url: str, max_width: int = 200, max_height: int = 200):
+async def image_proxy(request: Request, url: str):
     url = "http:/" + url
     async with AsyncClient() as client:
         r = await client.get(url)
     image = Image.open(BytesIO(r.content))
-    img_format = "image/jpeg"
     if image.mode == "P":  # ['1', 'L', 'I', 'F', 'P', 'RGB', 'RGBA', 'CMYK', 'YCbCr' ]
         # Gif
         imgs: List[Image.Image] = [frame.copy() for frame in ImageSequence.Iterator(image)]
