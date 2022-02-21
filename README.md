@@ -25,7 +25,7 @@ saya.require("WapQQ")
 如果选择直接使用本项目，请先按该文件内的要求编辑`config/config.yaml.sample`
 
 IP 和 端口号的配置在`saya/WapQQ/web/config.py`内
-默认为`localhost:8888`
+默认为`0.0.0.0:10002`
 
 如果一切准备就绪，请访问`http://localhost:8888/qq`
 
