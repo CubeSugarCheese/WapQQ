@@ -97,7 +97,7 @@
     <br>
     <a href="/qq">返回主页</a>
 
-    <form method="post" action="/qq/send_{{ type }}_message/{% if type == 'group' %}{{ group_id }}{% elif type == 'friend' %}{{ friend_id }}{% endif %}">
+    <form method="post" action="/qq/send_{{ type }}_message/{{ id }}">
         消息:<br>
         <label>
             <input type="text" name="message">
@@ -151,6 +151,20 @@
             <br>
         {% endfor %}
     {% endif %}
+         <p>【<a href="/qq/{{ type }}/{{ id }}">首页</a>|
+            {%- if page > 1 %}<a href="/qq/{{ type }}/{{ id }}?page={{ page - 1 }}">上一页</a>|{% endif %}
+            <span>第 {{ page }} 页|</span>
+            {%- if page < max_page %}<a href="/qq/{{ type }}/{{ id }}?page={{ page + 1 }}">下一页</a>|{% endif %}
+            <a href="/qq/{{ type }}/{{ id }}?page={{ max_page }}">末页</a>】
+         </p>
+    <form method="post" action="/qq/send_{{ type }}_message/{{ id }}">
+        消息:<br>
+        <label>
+            <input type="text" name="message">
+        </label>
+        <br>
+        <input type="submit" value="发送">
+    </form>
 
 {% elif status == 'error' %}
     ERROR发生！您选择的好友/群聊可能不正确！<a href="/qq">返回主页</a>

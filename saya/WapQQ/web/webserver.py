@@ -43,6 +43,7 @@ async def show_send_error_page(request: Request):
 @sanic.get("/qq/group/<group_id:int>")
 async def show_group_page(request: Request, group_id: int) -> HTTPResponse:
     global application
+    page = int(request.args.get("page")) if request.args.get("page") is not None else 1
     group_list = await application.getGroupList()
     status = "error"
     current_group = None
@@ -53,17 +54,19 @@ async def show_group_page(request: Request, group_id: int) -> HTTPResponse:
             break
     if status == "error":
         return html(await render_template("message_page.jinja2", status=status))
-    message_container_list = await dataManager.getGroupMessage(current_group, limit=chat_limit)
+    message_container_list = await dataManager.getGroupMessage(current_group, limit=chat_limit, page=page)
+    max_page = ((await dataManager.countGroupMessage(group_id)) // chat_limit) + 1
     template = await render_template("message_page.jinja2", messageContainer_list=message_container_list,
-                                     group_name=current_group.name, group_id=group_id, type='group',
+                                     group_name=current_group.name, id=group_id, type='group',
                                      status=status, account=application.account,
-                                     use_image_proxy=use_image_proxy)
+                                     use_image_proxy=use_image_proxy, page=page, max_page=max_page)
     return html(template)
 
 
 @sanic.get("/qq/friend/<friend_id:int>")
 async def show_friend_page(request: Request, friend_id: int) -> HTTPResponse:
     global application
+    page = int(request.args.get("page")) if request.args.get("page") is not None else 1
     friend_list = await application.getFriendList()
     status = "error"
     current_friend = None
@@ -75,10 +78,11 @@ async def show_friend_page(request: Request, friend_id: int) -> HTTPResponse:
     if status == "error":
         return html(await render_template("message_page.jinja2", status=status))
     message_container_list = await dataManager.getFriendMessage(current_friend)
+    max_page = ((await dataManager.countGroupMessage(friend_id)) // chat_limit) + 1
     template = await render_template("message_page.jinja2", messageContainer_list=message_container_list,
-                                     friend_name=current_friend.nickname, friend_id=friend_id, type='friend',
+                                     friend_name=current_friend.nickname, id=friend_id, type='friend',
                                      status=status, account=application.account,
-                                     use_image_proxy=use_image_proxy)
+                                     use_image_proxy=use_image_proxy, page=page, max_page=max_page)
     return html(template)
 
 

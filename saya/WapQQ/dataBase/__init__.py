@@ -8,8 +8,9 @@ from graia.ariadne.event.message import GroupMessage, FriendMessage
 from graia.ariadne.message.element import Source
 from graia.ariadne.model import Group, Friend, Member, Stranger, BotMessage
 from graia.ariadne.message.chain import MessageChain
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.engine.mock import MockConnection
+
 
 from .tables import metadata, GroupTable, AccountTable, MemberTable, FriendMessageTable, GroupMessageTable
 from .utils import MessageContainer, get_time_by_timestamp
@@ -213,9 +214,10 @@ class DataManager:
         name = info.memberName
         return name
 
-    async def getGroupMessage(self, group: Group, limit: int = 60) -> List[Optional[MessageContainer]]:
+    async def getGroupMessage(self, group: Group, limit: int = 60, page: int = 1) -> List[Optional[MessageContainer]]:
         query = GroupMessageTable.select().limit(limit) \
             .order_by(GroupMessageTable.c._id.desc()) \
+            .offset((page - 1)*limit) \
             .where(GroupMessageTable.c.groupID == group.id)
         result = await self.database.fetch_all(query)
         message_list: List[Optional[MessageContainer]] = []
@@ -242,12 +244,23 @@ class DataManager:
             sender_id = i[1]
             sender_name = await self.getAccountNameByID(account_id=sender_id)
             timestamp = i[2]
-            time = get_time_by_timestamp(timestamp)
+            time_ = get_time_by_timestamp(timestamp)
             message = MessageChain.fromPersistentString(i[4])
-            message_list.append(MessageContainer(time=time, timestamp=timestamp,
+            message_list.append(MessageContainer(time=time_, timestamp=timestamp,
                                                  message=message, sender_id=sender_id, sender_name=sender_name,
                                                  group_id=None, group_name=None))
         return message_list
 
+    async def countGroupMessage(self, group_id: int) -> int:
+        query = "select COUNT(*) from GroupMessage where groupID = :group_id"
+        values = {"group_id": group_id}
+        result = await self.database.fetch_val(query, values)
+        return result
+
+    async def countFriendMessage(self, friend_id: int) -> int:
+        query = "select COUNT(*) from FriendMessage where friendID = :friend_id"
+        values = {"friend_id": friend_id}
+        result = await self.database.fetch_val(query, values)
+        return result
 
 dataManager = DataManager()
