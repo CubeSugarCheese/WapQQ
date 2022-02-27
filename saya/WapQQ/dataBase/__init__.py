@@ -8,7 +8,7 @@ from graia.ariadne.event.message import GroupMessage, FriendMessage
 from graia.ariadne.message.element import Source
 from graia.ariadne.model import Group, Friend, Member, Stranger, BotMessage
 from graia.ariadne.message.chain import MessageChain
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine
 from sqlalchemy.engine.mock import MockConnection
 
 

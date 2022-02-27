@@ -1,12 +1,11 @@
 import asyncio
 from asyncio import Task
 
-from graia.ariadne.app import Ariadne
 from uvicorn import Config
 
 from .config import host, port
 from .utils import NoSignalServer
-from .webserver import sanic, setApplication
+from .webserver import sanic
 
 
 task: Task
