@@ -20,9 +20,9 @@ app: Ariadne
 
 
 @channel.use(ListenerSchema(listening_events=[ApplicationLaunched]))
-async def launch(app: Ariadne):
+async def launch():
     await dataManager.startup()
-    await launch_webserver(app)
+    await launch_webserver()
 
 
 @channel.use(ListenerSchema(listening_events=[ApplicationShutdowned]))
