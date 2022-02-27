@@ -8,7 +8,13 @@
 ### 作为`Saya`插件加载
 加载`saya`目录下的`WapQQ`目录即可
 ```python
-saya.require("WapQQ")
+from graia.saya import Saya
+from graia.broadcast import Broadcast
+bcc = Broadcast()
+saya = Saya(bcc)
+
+with saya.module_context():
+    saya.require("saya.WapQQ")
 ```
 
 ### 直接部署
@@ -17,7 +23,9 @@ saya.require("WapQQ")
 
 ## 安装依赖
 使用`pip`安装`saya/WapQQ/requirements.txt`即可
-`pip install -r saya/WapQQ/requirements.txt`
+```bash
+pip install -r saya/WapQQ/requirements.txt
+```
 
 ~~什么，为什么不用`poetry`之类的？别问，问就是懒狗。~~
 
@@ -27,6 +35,6 @@ saya.require("WapQQ")
 IP 和 端口号的配置在`saya/WapQQ/web/config.py`内
 默认为`0.0.0.0:10002`
 
-如果一切准备就绪，请访问`http://localhost:8888/qq`
+如果一切准备就绪，请访问`http://localhost:10002/qq`
 
 
