@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh" style="background-color: rgb(255,253,251)">
 <head>
-    <title>WabQQ({% if type == 'friend' %}好友:{{ friend_name }}{% elif type == 'group' %}群:{{ group_name }}){% endif %})</title>
+    <title>WapQQ({% if type == 'friend' %}好友:{{ friend_name }}{% elif type == 'group' %}群:{{ group_name }}){% endif %})</title>
     <meta charset="utf-8">
     <meta name="referrer" content="never">
     <style>
@@ -121,7 +121,7 @@
                     {%- elif j.type == "Image" -%}
                         {% if use_image_proxy %}<img src="/qq/image_proxy/{{ j["url"] }}" alt="图片" class="chat-image">{% else %}<img src="{{ j["url"] }}" alt="图片" class="chat-image">{% endif %}
                     {%- elif j.type == "At" -%}
-                        @<span class="id">{{ j["target"] }}</span>
+                        <span>@</span><span class="id">{{ j["target"] }}</span>
                     {%- elif j.type == "Quote" -%}
                         回复 {{ j["targetId"] }}
                     {%- elif j.type == "Face" -%}
@@ -144,8 +144,10 @@
                     {%- elif j.type == "File" -%}
                         {{ j.asDisplay() }}
                     {%- elif j.type == "Forward" -%}
-                        [合并转发]该消息不支持查看{{ j.type }}
-                    {%- else -%}{{ j.type }}<br>{{ j.asDisplay() }}
+                        [合并转发]该消息不支持查看
+                    {%- else -%}
+                        {{ j.type }}<br>
+                        {{ j.asDisplay() }}
                     {%- endif %}
                 {%- endfor %}</div>
             <br>
