@@ -1,7 +1,7 @@
 sqlalchemy
 databases[sqlite]
 pydantic
-uvicorn == 0.17.4
+uvicorn
 sanic
 loguru
 
