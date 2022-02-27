@@ -15,12 +15,7 @@ from ..dataBase import dataManager
 
 current_path = Path(__file__).parents[0]
 sanic = Sanic("WapQQ")
-application: Ariadne
-
-
-async def setApplication(app: Ariadne):
-    global application
-    application = app
+application: Ariadne = Ariadne.get_running()
 
 
 @sanic.get("/qq")
@@ -112,12 +107,15 @@ async def send_friend_message(request: Request, friend_id: int):
     return redirect(f"/qq/friend/{friend_id}")
 
 
-@sanic.get(r"/qq/image_proxy/http%3A/<url:path>")
-async def image_proxy(request: Request, url: str):
-    url = "http:/" + url
-    async with AsyncClient() as client:
-        r = await client.get(url)
-    image = Image.open(BytesIO(r.content))
+@sanic.get(r"/qq/image_proxy")
+async def image_proxy(request: Request):
+    url = request.args.get("url")
+    try:
+        async with AsyncClient() as client:
+            r = await client.get(url)
+        image = Image.open(BytesIO(r.content))
+    except:
+        return HTTPResponse(status=404)
     if image.mode == "P":  # ['1', 'L', 'I', 'F', 'P', 'RGB', 'RGBA', 'CMYK', 'YCbCr' ]
         # Gif
         imgs: List[Image.Image] = [frame.copy() for frame in ImageSequence.Iterator(image)]
