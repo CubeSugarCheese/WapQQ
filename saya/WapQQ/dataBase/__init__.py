@@ -8,6 +8,7 @@ from graia.ariadne.event.message import GroupMessage, FriendMessage
 from graia.ariadne.message.element import Source
 from graia.ariadne.model import Group, Friend, Member, Stranger, BotMessage
 from graia.ariadne.message.chain import MessageChain
+from graia.ariadne.exception import UnknownTarget
 from sqlalchemy import create_engine
 from sqlalchemy.engine.mock import MockConnection
 
@@ -224,7 +225,10 @@ class DataManager:
         for i in result:
             sender_id = i[1]
             group_id = i[2]
-            sender_name = await self.getMemberNameById(account_id=sender_id, group_id=group_id)
+            try:
+                sender_name = await self.getMemberNameById(account_id=sender_id, group_id=group_id)
+            except UnknownTarget:
+                sender_name = await self.getAccountNameByID(account_id=sender_id)
             group_name = await self.getGroupNameByID(group_id=group_id)
             timestamp = i[3]
             time = get_time_by_timestamp(timestamp)
