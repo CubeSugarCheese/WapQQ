@@ -82,6 +82,12 @@
             width:35px;
             height:35px;
         }
+
+        .face {
+            width: 25px;
+            height: 25px;
+            vertical-align: text-bottom;
+        }
     </style>
 </head>
 
@@ -125,7 +131,7 @@
                     {%- elif j.type == "Quote" -%}
                         回复 {{ j["targetId"] }}
                     {%- elif j.type == "Face" -%}
-                        {{ j.asDisplay() }}
+                        <img class="face" src="/qq/face/{{ j.faceId }}.png" alt="{{ j.asDisplay() }}">
                     {%- elif j.type == "MarketFace" -%}
                         {{ j.asDisplay() }}
                     {%- elif j.type == "Xml" -%}

@@ -1,5 +1,6 @@
 import asyncio
 from asyncio import Task
+from pathlib import Path
 
 from uvicorn import Config
 
@@ -10,6 +11,9 @@ from .webserver import sanic
 
 task: Task
 server: NoSignalServer
+current_path = Path(__file__).parents[0]
+
+sanic.static("/qq/face", current_path/"resources"/"qq-face")
 
 
 async def launch_webserver():
