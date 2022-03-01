@@ -12,7 +12,6 @@ from graia.ariadne.exception import UnknownTarget
 from sqlalchemy import create_engine
 from sqlalchemy.engine.mock import MockConnection
 
-
 from .tables import metadata, GroupTable, AccountTable, MemberTable, FriendMessageTable, GroupMessageTable
 from .utils import MessageContainer, get_time_by_timestamp
 
@@ -99,10 +98,14 @@ class DataManager:
             return
         info = await app.getMemberInfo(app.account, group)
         name = info.name
-        query = MemberTable.insert().values(name=name, accountID=app.account, groupID=group_id) \
-            .where(MemberTable.c.accountID == app.account) \
-            .where(MemberTable.c.name != name)
-        await self.database.execute(query)
+        query = MemberTable.select().where(
+            MemberTable.c.accountID == app.account
+        ).where(
+            MemberTable.c.groupID == group_id)
+        result = await self.database.fetch_val(query)
+        if result is None:
+            query = MemberTable.insert().values(name=name, accountID=app.account, groupID=group_id)
+            await self.database.execute(query)
 
     async def updateGroupName(self, group: Group):
         """自动检查 GroupName 是否变化，若变化则更新数据库"""
@@ -202,23 +205,25 @@ class DataManager:
             profile = await app.getBotProfile()
             name = profile.nickname
         else:
-            profile = await app.getFriendProfile(account_id)
-            name = profile.nickname
+            try:
+                profile = await app.getUserProfile(account_id)
+                name = profile.nickname
+            except UnknownTarget:
+                name = "【无法获取的用户】"
         return name
 
-    @staticmethod
-    async def getMemberNameById(account_id: int, group_id: int) -> str:
+    async def getMemberNameById(self, account_id: int, group_id: int) -> str:
         """通过 accountID 和 groupID 获得成员名"""
-        app: Ariadne = Ariadne.get_running()
-        group = await app.getGroup(group_id)
-        info = await app.getMemberInfo(account_id, group)
-        name = info.memberName
+        query = MemberTable.select().where(MemberTable.c.groupID == group_id).where(
+            MemberTable.c.accountID == account_id)
+        result = await self.database.fetch_one(query)
+        name = result[3]
         return name
 
     async def getGroupMessage(self, group: Group, limit: int = 60, page: int = 1) -> List[Optional[MessageContainer]]:
         query = GroupMessageTable.select().limit(limit) \
             .order_by(GroupMessageTable.c._id.desc()) \
-            .offset((page - 1)*limit) \
+            .offset((page - 1) * limit) \
             .where(GroupMessageTable.c.groupID == group.id)
         result = await self.database.fetch_all(query)
         message_list: List[Optional[MessageContainer]] = []
@@ -266,5 +271,6 @@ class DataManager:
         values = {"friend_id": friend_id}
         result = await self.database.fetch_val(query, values)
         return result
+
 
 dataManager = DataManager()

@@ -89,6 +89,7 @@ async def send_group_message(request: Request, group_id: int):
         return redirect("/qq/send_error")
     bot_message = await application.sendGroupMessage(group_id, MessageChain.create(message))
     await dataManager.addBotGroupMessage(bot_message, group_id)
+    await dataManager.addBotMember(group_id)
     await dataManager.updateBotMemberName(group_id)
     return redirect(f"/qq/group/{group_id}")
 
@@ -102,6 +103,7 @@ async def send_friend_message(request: Request, friend_id: int):
         return redirect("/qq/send_error")
     bot_message = await application.sendFriendMessage(friend_id, MessageChain.create(message))
     await dataManager.addBotFriendMessage(bot_message, friend_id)
+    await dataManager.addBotAccount()
     await dataManager.updateBotAccountName()
     return redirect(f"/qq/friend/{friend_id}")
 
