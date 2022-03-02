@@ -97,7 +97,7 @@ class DataManager:
         if group is None:
             return
         info = await app.getMemberInfo(app.account, group)
-        name = info.name
+        name = info.memberName
         query = MemberTable.select().where(
             MemberTable.c.accountID == app.account
         ).where(
@@ -151,7 +151,7 @@ class DataManager:
         if group is None:
             return
         info = await app.getMemberInfo(app.account, group)
-        name = info.name
+        name = info.memberName
         query = MemberTable.update().values(name=name) \
             .where(MemberTable.c.accountID == app.account) \
             .where(MemberTable.c.name != name)
