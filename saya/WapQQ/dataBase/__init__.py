@@ -4,7 +4,7 @@ from pathlib import Path
 
 from databases import Database, core
 from graia.ariadne.app import Ariadne
-from graia.ariadne.event.message import GroupMessage, FriendMessage
+from graia.ariadne.event.message import GroupMessage, FriendMessage, GroupSyncMessage, FriendSyncMessage
 from graia.ariadne.message.element import Source
 from graia.ariadne.model import Group, Friend, Member, Stranger, BotMessage
 from graia.ariadne.message.chain import MessageChain
@@ -187,6 +187,22 @@ class DataManager:
                                                    friendID=friend_id,
                                                    timestamp=time.time(),
                                                    context=message.origin.asPersistentString())
+        await self.database.execute(query)
+
+    async def addSyncGroupMessage(self, message: GroupSyncMessage):
+        """往数据库中添加 GroupSyncMessage """
+        query = GroupMessageTable.insert().values(senderID=Ariadne.get_running().account,
+                                                  groupID=message.subject.id,
+                                                  timestamp=time.time(),
+                                                  context=message.messageChain.asPersistentString())
+        await self.database.execute(query)
+
+    async def addSyncFriendMessage(self, message: FriendSyncMessage):
+        """往数据库中添加 FriendSyncMessage """
+        query = FriendMessageTable.insert().values(senderID=Ariadne.get_running().account,
+                                                   friendID=message.subject.id,
+                                                   timestamp=time.time(),
+                                                   context=message.messageChain.asPersistentString())
         await self.database.execute(query)
 
     @staticmethod

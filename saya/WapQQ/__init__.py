@@ -1,5 +1,5 @@
 from graia.ariadne.event.lifecycle import ApplicationLaunched, ApplicationShutdowned
-from graia.ariadne.event.message import GroupMessage, FriendMessage
+from graia.ariadne.event.message import GroupMessage, FriendMessage, GroupSyncMessage, FriendSyncMessage
 from graia.ariadne.app import Ariadne
 
 from graia.saya import Channel
@@ -54,3 +54,20 @@ async def handleFriendMessage(message: FriendMessage):
     if not await dataManager.has_in_accountTable(friend):
         await dataManager.addAccount(friend)
     await dataManager.updateAccountName(friend)
+
+
+@channel.use(ListenerSchema(listening_events=[GroupSyncMessage]))
+async def handleGroupSyncMessage(message: GroupSyncMessage):
+    group_id = message.subject.id
+    await dataManager.addSyncGroupMessage(message)
+    await dataManager.addBotMember(group_id)
+    await dataManager.updateBotMemberName(group_id)
+    await dataManager.addBotAccount()
+    await dataManager.updateBotAccountName()
+
+
+@channel.use(ListenerSchema(listening_events=[FriendSyncMessage]))
+async def handleFriendSyncMessage(message: FriendSyncMessage):
+    await dataManager.addSyncFriendMessage(message)
+    await dataManager.addBotAccount()
+    await dataManager.updateBotAccountName()
