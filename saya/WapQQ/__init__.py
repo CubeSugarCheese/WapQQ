@@ -71,3 +71,4 @@ async def handleFriendSyncMessage(message: FriendSyncMessage):
     await dataManager.addSyncFriendMessage(message)
     await dataManager.addBotAccount()
     await dataManager.updateBotAccountName()
+
