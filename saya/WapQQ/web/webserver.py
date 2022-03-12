@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List
 
 from PIL import Image, ImageSequence, UnidentifiedImageError
-from graia.ariadne.app import Ariadne
+from graia.ariadne import get_running
 from graia.ariadne.message.chain import MessageChain
 from httpx import AsyncClient
 from httpx import RequestError
@@ -21,7 +21,7 @@ sanic = Sanic("WapQQ")
 
 @sanic.get("/qq")
 async def show_main_page(request: Request) -> HTTPResponse:
-    application = list(Ariadne.running)[0]
+    application = get_running()
     account = application.account
     group_list = await application.getGroupList()
     friend_list = await application.getFriendList()
@@ -38,7 +38,7 @@ async def show_send_error_page(request: Request):
 
 @sanic.get("/qq/group/<group_id:int>")
 async def show_group_page(request: Request, group_id: int) -> HTTPResponse:
-    application = list(Ariadne.running)[0]
+    application = get_running()
     page = int(request.args.get("page")) if request.args.get("page") is not None else 1
     group_list = await application.getGroupList()
     status = "error"
@@ -61,7 +61,7 @@ async def show_group_page(request: Request, group_id: int) -> HTTPResponse:
 
 @sanic.get("/qq/friend/<friend_id:int>")
 async def show_friend_page(request: Request, friend_id: int) -> HTTPResponse:
-    application = list(Ariadne.running)[0]
+    application = get_running()
     page = int(request.args.get("page")) if request.args.get("page") is not None else 1
     friend_list = await application.getFriendList()
     status = "error"
@@ -84,7 +84,7 @@ async def show_friend_page(request: Request, friend_id: int) -> HTTPResponse:
 
 @sanic.post("/qq/send_group_message/<group_id:int>")
 async def send_group_message(request: Request, group_id: int):
-    application = list(Ariadne.running)[0]
+    application = get_running()
     try:
         message: str = request.form["message"]
     except KeyError:
@@ -98,7 +98,7 @@ async def send_group_message(request: Request, group_id: int):
 
 @sanic.post("/qq/send_friend_message/<friend_id:int>")
 async def send_friend_message(request: Request, friend_id: int):
-    application = list(Ariadne.running)[0]
+    application = get_running()
     try:
         message: str = request.form["message"]
     except KeyError:

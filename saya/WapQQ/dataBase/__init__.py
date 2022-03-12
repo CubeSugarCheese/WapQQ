@@ -3,6 +3,7 @@ from typing import Optional, Union, List
 from pathlib import Path
 
 from databases import Database, core
+from graia.ariadne import get_running
 from graia.ariadne.app import Ariadne
 from graia.ariadne.event.message import GroupMessage, FriendMessage, GroupSyncMessage, FriendSyncMessage
 from graia.ariadne.message.element import Source
@@ -31,7 +32,7 @@ class DataManager:
         await self.database.connect()
         self.engine = create_engine(self.DATABASE_URL, connect_args={"check_same_thread": False})
         metadata.create_all(self.engine)  # 自动检查是否已经创建表，若无，则创建
-        self.app = list(Ariadne.running)[0]
+        self.app = get_running()
 
     async def shutdown(self):
         """应在关闭 bot 时调用，用于关闭数据库连接"""
