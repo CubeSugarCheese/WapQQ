@@ -24,12 +24,14 @@ class DataManager:
     DATABASE_URL: str = f"sqlite:///{current_path}/data.db"
     database: core.Database = Database(DATABASE_URL)
     engine: MockConnection
+    app: Ariadne
 
     async def startup(self):
         """应在开启 bot 时调用，用于开启数据库连接"""
         await self.database.connect()
         self.engine = create_engine(self.DATABASE_URL, connect_args={"check_same_thread": False})
         metadata.create_all(self.engine)  # 自动检查是否已经创建表，若无，则创建
+        self.app = list(Ariadne.running)[0]
 
     async def shutdown(self):
         """应在关闭 bot 时调用，用于关闭数据库连接"""
@@ -85,26 +87,24 @@ class DataManager:
 
     async def addBotAccount(self):
         """往数据库中添加 Bot 自身的账号信息"""
-        app: Ariadne = Ariadne.get_running()
-        profile = await app.getBotProfile()
-        query = AccountTable.insert().values(accountID=app.account, name=profile.nickname)
+        profile = await self.app.getBotProfile()
+        query = AccountTable.insert().values(accountID=self.app.account, name=profile.nickname)
         await self.database.execute(query)
 
     async def addBotMember(self, group_id: int):
         """往数据库中添加 Bot 自身在 Group 中的的成员信息"""
-        app: Ariadne = Ariadne.get_running()
-        group = await app.getGroup(group_id)
+        group = await self.app.getGroup(group_id)
         if group is None:
             return
-        info = await app.getMemberInfo(app.account, group)
+        info = await self.app.getMemberInfo(self.app.account, group)
         name = info.memberName
         query = MemberTable.select().where(
-            MemberTable.c.accountID == app.account
+            MemberTable.c.accountID == self.app.account
         ).where(
             MemberTable.c.groupID == group_id)
         result = await self.database.fetch_val(query)
         if result is None:
-            query = MemberTable.insert().values(name=name, accountID=app.account, groupID=group_id)
+            query = MemberTable.insert().values(name=name, accountID=self.app.account, groupID=group_id)
             await self.database.execute(query)
 
     async def updateGroupName(self, group: Group):
@@ -137,23 +137,21 @@ class DataManager:
 
     async def updateBotAccountName(self):
         """自动检查 Bot 自身 nickname 是否变化，若变化则更新数据库"""
-        app: Ariadne = Ariadne.get_running()
-        profile = await app.getBotProfile()
+        profile = await self.app.getBotProfile()
         query = AccountTable.update().values(name=profile.nickname) \
-            .where(AccountTable.c.accountID == app.account) \
+            .where(AccountTable.c.accountID == self.app.account) \
             .where(AccountTable.c.name != profile.nickname)
         await self.database.execute(query)
 
     async def updateBotMemberName(self, group_id: int):
         """自动检查 Bot 自身所在 Group 中的 name 是否变化，若变化则更新数据库"""
-        app: Ariadne = Ariadne.get_running()
-        group = await app.getGroup(group_id)
+        group = await self.app.getGroup(group_id)
         if group is None:
             return
-        info = await app.getMemberInfo(app.account, group)
+        info = await self.app.getMemberInfo(self.app.account, group)
         name = info.memberName
         query = MemberTable.update().values(name=name) \
-            .where(MemberTable.c.accountID == app.account) \
+            .where(MemberTable.c.accountID == self.app.account) \
             .where(MemberTable.c.name != name)
         await self.database.execute(query)
 
@@ -175,7 +173,7 @@ class DataManager:
 
     async def addBotGroupMessage(self, message: BotMessage, group_id: int):
         """往数据库中添加 由 Bot 自身发送的 GroupMessage """
-        query = GroupMessageTable.insert().values(senderID=Ariadne.get_running().account,
+        query = GroupMessageTable.insert().values(senderID=self.app.account,
                                                   groupID=group_id,
                                                   timestamp=time.time(),
                                                   context=message.origin.asPersistentString())
@@ -183,7 +181,7 @@ class DataManager:
 
     async def addBotFriendMessage(self, message: BotMessage, friend_id: int):
         """往数据库中添加 由 Bot 自身发送的 FriendMessage """
-        query = FriendMessageTable.insert().values(senderID=Ariadne.get_running().account,
+        query = FriendMessageTable.insert().values(senderID=self.app.account,
                                                    friendID=friend_id,
                                                    timestamp=time.time(),
                                                    context=message.origin.asPersistentString())
@@ -191,7 +189,7 @@ class DataManager:
 
     async def addSyncGroupMessage(self, message: GroupSyncMessage):
         """往数据库中添加 GroupSyncMessage """
-        query = GroupMessageTable.insert().values(senderID=Ariadne.get_running().account,
+        query = GroupMessageTable.insert().values(senderID=self.app.account,
                                                   groupID=message.subject.id,
                                                   timestamp=time.time(),
                                                   context=message.messageChain.asPersistentString())
@@ -199,30 +197,26 @@ class DataManager:
 
     async def addSyncFriendMessage(self, message: FriendSyncMessage):
         """往数据库中添加 FriendSyncMessage """
-        query = FriendMessageTable.insert().values(senderID=Ariadne.get_running().account,
+        query = FriendMessageTable.insert().values(senderID=self.app.account,
                                                    friendID=message.subject.id,
                                                    timestamp=time.time(),
                                                    context=message.messageChain.asPersistentString())
         await self.database.execute(query)
 
-    @staticmethod
-    async def getGroupNameByID(group_id: int) -> str:
+    async def getGroupNameByID(self, group_id: int) -> str:
         """通过 groupID 获取群名"""
-        app: Ariadne = Ariadne.get_running()
-        group = await app.getGroup(group_id)
+        group = await self.app.getGroup(group_id)
         name = group.name
         return name
 
-    @staticmethod
-    async def getAccountNameByID(account_id: int) -> str:
+    async def getAccountNameByID(self, account_id: int) -> str:
         """通过 accountID 获取账号名"""
-        app: Ariadne = Ariadne.get_running()
-        if account_id == app.account:
-            profile = await app.getBotProfile()
+        if account_id == self.app.account:
+            profile = await self.app.getBotProfile()
             name = profile.nickname
         else:
             try:
-                profile = await app.getUserProfile(account_id)
+                profile = await self.app.getUserProfile(account_id)
                 name = profile.nickname
             except UnknownTarget:
                 name = "【无法获取的用户】"

@@ -1,11 +1,13 @@
+import asyncio
 from io import BytesIO
 from pathlib import Path
 from typing import List
 
-from PIL import Image, ImageSequence
+from PIL import Image, ImageSequence, UnidentifiedImageError
 from graia.ariadne.app import Ariadne
 from graia.ariadne.message.chain import MessageChain
 from httpx import AsyncClient
+from httpx import RequestError
 from sanic import Sanic, Request, html, HTTPResponse
 from sanic.response import redirect, raw
 
@@ -19,7 +21,7 @@ sanic = Sanic("WapQQ")
 
 @sanic.get("/qq")
 async def show_main_page(request: Request) -> HTTPResponse:
-    application = Ariadne.get_running()
+    application = list(Ariadne.running)[0]
     account = application.account
     group_list = await application.getGroupList()
     friend_list = await application.getFriendList()
@@ -36,7 +38,7 @@ async def show_send_error_page(request: Request):
 
 @sanic.get("/qq/group/<group_id:int>")
 async def show_group_page(request: Request, group_id: int) -> HTTPResponse:
-    application = Ariadne.get_running()
+    application = list(Ariadne.running)[0]
     page = int(request.args.get("page")) if request.args.get("page") is not None else 1
     group_list = await application.getGroupList()
     status = "error"
@@ -59,7 +61,7 @@ async def show_group_page(request: Request, group_id: int) -> HTTPResponse:
 
 @sanic.get("/qq/friend/<friend_id:int>")
 async def show_friend_page(request: Request, friend_id: int) -> HTTPResponse:
-    application = Ariadne.get_running()
+    application = list(Ariadne.running)[0]
     page = int(request.args.get("page")) if request.args.get("page") is not None else 1
     friend_list = await application.getFriendList()
     status = "error"
@@ -82,7 +84,7 @@ async def show_friend_page(request: Request, friend_id: int) -> HTTPResponse:
 
 @sanic.post("/qq/send_group_message/<group_id:int>")
 async def send_group_message(request: Request, group_id: int):
-    application = Ariadne.get_running()
+    application = list(Ariadne.running)[0]
     try:
         message: str = request.form["message"]
     except KeyError:
@@ -96,7 +98,7 @@ async def send_group_message(request: Request, group_id: int):
 
 @sanic.post("/qq/send_friend_message/<friend_id:int>")
 async def send_friend_message(request: Request, friend_id: int):
-    application = Ariadne.get_running()
+    application = list(Ariadne.running)[0]
     try:
         message: str = request.form["message"]
     except KeyError:
@@ -115,8 +117,16 @@ async def image_proxy(request: Request):
         async with AsyncClient() as client:
             r = await client.get(url)
         image = Image.open(BytesIO(r.content))
-    except:
-        return HTTPResponse(status=404)
+    except RequestError:
+        return HTTPResponse("invalid url", status=403)
+    except UnidentifiedImageError:
+        return HTTPResponse("content not support, must image", status=403)
+    img_bytes = await asyncio.to_thread(lambda: thumbnail_image(image))
+    img_format = Image.open(img_bytes).get_format_mimetype()
+    return raw(img_bytes.getvalue(), content_type=img_format)
+
+
+def thumbnail_image(image: Image.Image) -> (BytesIO, str):
     if image.mode == "P":  # ['1', 'L', 'I', 'F', 'P', 'RGB', 'RGBA', 'CMYK', 'YCbCr' ]
         # Gif
         imgs: List[Image.Image] = [frame.copy() for frame in ImageSequence.Iterator(image)]
@@ -124,9 +134,9 @@ async def image_proxy(request: Request):
         for i in imgs:
             i.thumbnail((max_width, max_height))
             gif_frames.append(i)
-        send_image = BytesIO()
+        thumbnail_image = BytesIO()
         gif_frames[0].save(
-            send_image,
+            thumbnail_image,
             format="GIF",
             append_images=gif_frames[1:],
             save_all=True,
@@ -135,15 +145,12 @@ async def image_proxy(request: Request):
             optimize=False,
             quality=100
         )
-        img_format = "image/gif"
     elif image.mode == "RGBA":
         image.thumbnail((max_width, max_height))
-        send_image = BytesIO()
-        image.save(send_image, format="PNG")
-        img_format = "image/png"
+        thumbnail_image = BytesIO()
+        image.save(thumbnail_image, format="PNG")
     else:
         image.thumbnail((max_width, max_height))
-        send_image = BytesIO()
-        image.save(send_image, format="JPEG")
-        img_format = "image/jpeg"
-    return raw(send_image.getvalue(), content_type=img_format)
+        thumbnail_image = BytesIO()
+        image.save(thumbnail_image, format="JPEG")
+    return thumbnail_image
