@@ -4,4 +4,6 @@ pydantic
 uvicorn
 sanic
 loguru
-
+jinja2
+Pillow
+httpx
