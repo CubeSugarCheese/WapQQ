@@ -1,8 +1,10 @@
 import asyncio
 from io import BytesIO
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Tuple
 
+import cv2
+from numpy import ndarray
 from PIL import Image, ImageSequence, UnidentifiedImageError
 from graia.ariadne import get_running
 from graia.ariadne.message.chain import MessageChain
@@ -122,35 +124,46 @@ async def image_proxy(request: Request):
     except UnidentifiedImageError:
         return HTTPResponse("content not support, must image", status=403)
     img_bytes = await asyncio.to_thread(lambda: thumbnail_image(image))
-    img_format = Image.open(img_bytes).get_format_mimetype()
-    return raw(img_bytes.getvalue(), content_type=img_format)
+    return raw(img_bytes.getvalue())
 
 
-def thumbnail_image(image: Image.Image) -> (BytesIO, str):
+def thumbnail_dynamic_image(image: Image.Image, img_format: str = "GIF") -> BytesIO:
+    imgs: List[Image.Image] = [frame.copy() for frame in ImageSequence.Iterator(image)]
+    img_frames: List[Image.Image] = []
+    for i in imgs:
+        i.thumbnail((max_width, max_height), Image.ANTIALIAS)
+        img_frames.append(i)
+    after_image = BytesIO()
+    img_frames[0].save(
+        after_image,
+        format=img_format,
+        append_images=img_frames[1:],
+        save_all=True,
+        duration=60,
+        loop=0,
+        optimize=False,
+        quality=100
+    )
+    return after_image
+
+
+def thumbnail_image(image: Image.Image) -> BytesIO:
+    after_image = BytesIO()
     if image.mode == "P":  # ['1', 'L', 'I', 'F', 'P', 'RGB', 'RGBA', 'CMYK', 'YCbCr' ]
         # Gif
-        imgs: List[Image.Image] = [frame.copy() for frame in ImageSequence.Iterator(image)]
-        gif_frames: List[Image.Image] = []
-        for i in imgs:
-            i.thumbnail((max_width, max_height))
-            gif_frames.append(i)
-        thumbnail_image = BytesIO()
-        gif_frames[0].save(
-            thumbnail_image,
-            format="GIF",
-            append_images=gif_frames[1:],
-            save_all=True,
-            duration=60,
-            loop=0,
-            optimize=False,
-            quality=100
-        )
+        after_image = thumbnail_dynamic_image(image, "GIF")
     elif image.mode == "RGBA":
-        image.thumbnail((max_width, max_height))
-        thumbnail_image = BytesIO()
-        image.save(thumbnail_image, format="PNG")
+        if image.get_format_mimetype() == "image/apng":
+            # APNG
+            after_image = thumbnail_dynamic_image(image, "PNG")
+        elif image.format == "WEBP":
+            # WEBP
+            after_image = thumbnail_dynamic_image(image, "WEBP")
+        else:
+            # normal PNG
+            image.thumbnail((max_width, max_height), Image.ANTIALIAS)
+            image.save(after_image, format="PNG")
     else:
-        image.thumbnail((max_width, max_height))
-        thumbnail_image = BytesIO()
-        image.save(thumbnail_image, format="JPEG")
-    return thumbnail_image
+        image.thumbnail((max_width, max_height), Image.ANTIALIAS)
+        image.save(after_image, format="JPEG")
+    return after_image
