@@ -1,10 +1,8 @@
 import asyncio
 from io import BytesIO
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List
 
-import cv2
-from numpy import ndarray
 from PIL import Image, ImageSequence, UnidentifiedImageError
 from graia.ariadne import get_running
 from graia.ariadne.message.chain import MessageChain
