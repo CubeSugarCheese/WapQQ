@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 /saya/WapQQ/dataBase/data.db
 /config/config.yaml
+/poetry.lock
+/logs/
