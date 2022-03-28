@@ -22,12 +22,26 @@ with saya.module_context():
 `python main.py`
 
 ## 安装依赖
-使用`pip`安装`saya/WapQQ/requirements.txt`即可
+### 使用`poetry`
 ```bash
-pip install -r saya/WapQQ/requirements.txt
+# 安装虚拟环境
+poetry env use python
+# 安装依赖
+poetry install
+# 启动机器人
+poetry run python main.py
 ```
 
-~~什么，为什么不用`poetry`之类的？别问，问就是懒狗。~~
+### 使用`pip`安装` (不推荐)
+```bash
+# 安装机器人依赖
+pip install -r ./requirements.txt
+# 安装插件依赖
+pip install -r saya/WapQQ/requirements.txt
+# 启动机器人
+python main.py
+```
+
 
 ## 配置
 如果选择直接使用本项目，请先按该文件内的要求编辑`config/config.yaml.sample`
