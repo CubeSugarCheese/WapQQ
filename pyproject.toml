@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "WapQQ"
+version = "0.1.0"
+description = "一个简单的网页端QQ，基于Ariadne。"
+authors = ["CubeSugarCheese <cubesugarcheese@qq.com>"]
+license = "GNU Affero General Public License v3.0"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+graia-ariadne = "^0.6.12"
+graia-saya = "^0.0.15"
+pyyaml = "^6.0"
+sqlalchemy = "^1.4.32"
+databases = "^0.5.5"
+uvicorn = "^0.17.6"
+sanic = "^21.12.1"
+loguru = "^0.6.0"
+jinja2 = "^3.1.1"
+Pillow = "^9.0.1"
+httpx = "0.22.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+default = true
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
