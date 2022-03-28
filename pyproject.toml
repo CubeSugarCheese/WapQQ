@@ -11,13 +11,14 @@ graia-ariadne = "^0.6.12"
 graia-saya = "^0.0.15"
 pyyaml = "^6.0"
 sqlalchemy = "^1.4.32"
-databases = "^0.5.5"
+databases = {extras = ["sqlite"], version = "^0.5.5"}
 uvicorn = "^0.17.6"
 sanic = "^21.12.1"
 loguru = "^0.6.0"
 jinja2 = "^3.1.1"
 Pillow = "^9.0.1"
 httpx = "^0.22.0"
+prompt_toolkit = "^3.0.28"
 
 [tool.poetry.dev-dependencies]
 

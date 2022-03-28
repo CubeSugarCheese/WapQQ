@@ -1,3 +1,4 @@
 graia-ariadne
 graia-saya
 pyyaml
+prompt_toolkit
