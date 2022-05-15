@@ -122,7 +122,8 @@ async def image_proxy(request: Request):
     except UnidentifiedImageError:
         return HTTPResponse("content not support, must image", status=403)
     img_bytes = await asyncio.to_thread(lambda: thumbnail_image(image))
-    return raw(img_bytes.getvalue())
+    img_format = Image.open(img_bytes).get_format_mimetype()
+    return raw(img_bytes.getvalue(), content_type=img_format)
 
 
 def thumbnail_dynamic_image(image: Image.Image, img_format: str = "GIF") -> BytesIO:
