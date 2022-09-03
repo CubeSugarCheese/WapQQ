@@ -14,6 +14,7 @@ from graia.saya.builtins.broadcast import BroadcastBehaviour
 from loguru import logger
 from prompt_toolkit.patch_stdout import StdoutProxy
 
+from config import appConfig
 
 LOGPATH = Path("./logs")
 LOGPATH.mkdir(exist_ok=True)
@@ -36,10 +37,10 @@ bcc = create(Broadcast)
 inc = InterruptControl(bcc)
 app = Ariadne(
     connection=config(
-        1710564415,  # 你的机器人的 qq 号
-        "asnfhsudhun",  # 填入你的 mirai-api-http 配置中的 verifyKey
-        HttpClientConfig(host="http://127.0.0.1:10088"),
-        WebsocketClientConfig(host="http://127.0.0.1:10088"),
+        appConfig.account,  # 你的机器人的 qq 号
+        appConfig.verify_key,  # 填入你的 mirai-api-http 配置中的 verifyKey
+        HttpClientConfig(host=appConfig.http_host),
+        WebsocketClientConfig(host=appConfig.ws_host),
     ),
 )
 saya = Saya(bcc)

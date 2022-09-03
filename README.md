@@ -32,12 +32,10 @@ poetry install
 poetry run python main.py
 ```
 
-### 使用`pip`安装` (不推荐)
+### 使用`pip`安装`
 ```bash
-# 安装机器人依赖
+# 安装依赖
 pip install -r ./requirements.txt
-# 安装插件依赖
-pip install -r saya/WapQQ/requirements.txt
 # 启动机器人
 python main.py
 ```

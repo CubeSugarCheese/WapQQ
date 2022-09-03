@@ -1,8 +1,0 @@
-sqlalchemy
-databases[sqlite]
-uvicorn
-sanic
-loguru
-jinja2
-Pillow
-httpx

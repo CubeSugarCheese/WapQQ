@@ -1,5 +1,6 @@
 # 使用前请编辑此文件并将后缀名改为 .yaml
-host: "http://localhost:8080"
+http_host: "http://localhost:8080"
+ws_host: "http://localhost:8080"
 verify_key: "ServiceVerifyKey"
 account: 1145141919810
 init: false # 编辑完成后请设置为 true ，否则不会启动
