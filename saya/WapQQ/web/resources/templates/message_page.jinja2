@@ -131,29 +131,29 @@
                     {%- elif j.type == "Quote" -%}
                         回复 {{ j["targetId"] }}
                     {%- elif j.type == "Face" -%}
-                        <img class="face" src="/face/{{ j.faceId }}.png" alt="{{ j.asDisplay() }}">
+                        <img class="face" src="/face/{{ j.faceId }}.png" alt="{{ j.display }}">
                     {%- elif j.type == "MarketFace" -%}
-                        {{ j.asDisplay() }}
+                        {{ j.display }}
                     {%- elif j.type == "Xml" -%}
-                        {{ j.asDisplay() }}<br>
+                        {{ j.display }}<br>
                         {{ j.xml }}
                     {%- elif j.type == "Json" -%}
-                        {{ j.asDisplay() }}<br>
+                        {{ j.display }}<br>
                         {{ j.Json }}
                     {%- elif j.type == "App" -%}
-                        {{ j.asDisplay() }}<br>
+                        {{ j.display }}<br>
                         {{ j.content }}
                     {%- elif j.type == "MusicShare" -%}
-                        {{ j.asDisplay() }}
+                        {{ j.display }}
                     {%- elif j.type == "Dice" -%}
-                        {{ j.asDisplay() }}
+                        {{ j.display }}
                     {%- elif j.type == "File" -%}
-                        {{ j.asDisplay() }}
+                        {{ j.display }}
                     {%- elif j.type == "Forward" -%}
                         [合并转发]该消息不支持查看
                     {%- else -%}
                         {{ j.type }}<br>
-                        {{ j.asDisplay() }}
+                        {{ j.display }}
                     {%- endif %}
                 {%- endfor %}</div>
             <br>
