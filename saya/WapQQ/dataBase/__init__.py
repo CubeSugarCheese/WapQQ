@@ -173,7 +173,7 @@ class DataManager:
         await self.database.execute(query)
 
     async def addBotGroupMessage(self, message: ActiveGroupMessage, group_id: int):
-        """往数据库中添加 由 Bot 自身发送的 GroupMessage """
+        """往数据库中添加 ActiveGroupMessage """
         query = GroupMessageTable.insert().values(senderID=self.app.account,
                                                   groupID=group_id,
                                                   timestamp=time.time(),
@@ -181,7 +181,7 @@ class DataManager:
         await self.database.execute(query)
 
     async def addBotFriendMessage(self, message: ActiveFriendMessage, friend_id: int):
-        """往数据库中添加 由 Bot 自身发送的 FriendMessage """
+        """往数据库中添加 ActiveFriendMessage """
         query = FriendMessageTable.insert().values(senderID=self.app.account,
                                                    friendID=friend_id,
                                                    timestamp=time.time(),
