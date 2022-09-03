@@ -22,7 +22,25 @@ with saya.module_context():
 `python main.py`
 
 ## 安装依赖
+### 使用`pdm`
+```bash
+# 安装虚拟环境
+pdm use python
+# 安装依赖
+pdm install
+# 启动机器人
+pdm run python main.py
+```
+### 使用`pip`
+```bash
+# 安装依赖
+pip install -r ./requirements.txt
+# 启动机器人
+python main.py
+```
 ### 使用`poetry`
+`poetry`安装依赖非常非常慢！如果你不想的话，可以使用其他方式。
+详见[why-is-the-dependency-resolution-process-slow](https://python-poetry.org/docs/faq/#why-is-the-dependency-resolution-process-slow)
 ```bash
 # 安装虚拟环境
 poetry env use python
@@ -32,21 +50,15 @@ poetry install
 poetry run python main.py
 ```
 
-### 使用`pip`安装`
-```bash
-# 安装依赖
-pip install -r ./requirements.txt
-# 启动机器人
-python main.py
-```
+
 
 
 ## 配置
 如果选择直接使用本项目，请先按该文件内的要求编辑`config/config.yaml.sample`
 
-IP 和 端口号的配置在`saya/WapQQ/web/config.py`内
+IP 和 端口号的配置在`saya/WapQQ/web/config.py`内，
 默认为`0.0.0.0:10002`
 
-如果一切准备就绪，请访问`http://localhost:10002/qq`
+如果一切准备就绪，请访问`http://localhost:10002/`
 
 

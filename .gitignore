@@ -131,3 +131,5 @@ dmypy.json
 /config/config.yaml
 /poetry.lock
 /logs/
+/pdm.lock
+/.pdm.toml

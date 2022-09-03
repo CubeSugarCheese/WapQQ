@@ -7,8 +7,8 @@ license = "GNU Affero General Public License v3.0"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-graia-ariadne = "^0.6.12"
-graia-saya = "^0.0.15"
+graia-ariadne = "^0.9.1"
+graia-saya = "^0.0.16"
 pyyaml = "^6.0"
 sqlalchemy = "^1.4.32"
 databases = {extras = ["sqlite"], version = "^0.5.5"}
@@ -32,3 +32,9 @@ build-backend = "poetry.core.masonry.api"
 default = true
 name = "tsinghua"
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+
+
+[[tool.pdm.source]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+verify_ssl = true
+name = "pypi"

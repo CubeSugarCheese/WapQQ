@@ -1,4 +1,4 @@
-# 使用前请编辑此文件并将后缀名改为 .yaml
+# 使用前请编辑本文件并将文件名改为 config.yaml
 http_host: "http://localhost:8080"
 ws_host: "http://localhost:8080"
 verify_key: "ServiceVerifyKey"
