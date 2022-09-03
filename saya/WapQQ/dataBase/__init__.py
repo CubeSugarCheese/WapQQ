@@ -3,15 +3,15 @@ from typing import Optional, Union, List
 from pathlib import Path
 
 from databases import Database, core
-from graia.ariadne import get_running
 from graia.ariadne.app import Ariadne
-from graia.ariadne.event.message import GroupMessage, FriendMessage, GroupSyncMessage, FriendSyncMessage
+from graia.ariadne.event.message import GroupMessage, FriendMessage, GroupSyncMessage, FriendSyncMessage, \
+    ActiveFriendMessage, ActiveGroupMessage
 from graia.ariadne.message.element import Source
-from graia.ariadne.model import Group, Friend, Member, Stranger, BotMessage
+from graia.ariadne.model import Group, Friend, Member, Stranger
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.exception import UnknownTarget
 from sqlalchemy import create_engine
-from sqlalchemy.engine.mock import MockConnection
+from sqlalchemy.engine import Engine
 
 from .tables import metadata, GroupTable, AccountTable, MemberTable, FriendMessageTable, GroupMessageTable
 from .utils import MessageContainer, get_time_by_timestamp
@@ -24,7 +24,7 @@ class DataManager:
     # see https://docs.sqlalchemy.org/en/14/core/engines.html#sqlite
     DATABASE_URL: str = f"sqlite:///{current_path}/data.db"
     database: core.Database = Database(DATABASE_URL)
-    engine: MockConnection
+    engine: Engine
     app: Ariadne
 
     async def startup(self):
@@ -32,7 +32,7 @@ class DataManager:
         await self.database.connect()
         self.engine = create_engine(self.DATABASE_URL, connect_args={"check_same_thread": False})
         metadata.create_all(self.engine)  # 自动检查是否已经创建表，若无，则创建
-        self.app = get_running()
+        self.app = Ariadne.current()
 
     async def shutdown(self):
         """应在关闭 bot 时调用，用于关闭数据库连接"""
@@ -75,7 +75,7 @@ class DataManager:
     async def addAccount(self, account: Union[Friend, Stranger, Member]):
         """往数据库中添加新 Account """
         if isinstance(account, Member):
-            profile = await account.getProfile()
+            profile = await account.get_profile()
             query = AccountTable.insert().values(accountID=account.id, name=profile.nickname)
         else:
             query = AccountTable.insert().values(accountID=account.id, name=account.nickname)
@@ -88,16 +88,16 @@ class DataManager:
 
     async def addBotAccount(self):
         """往数据库中添加 Bot 自身的账号信息"""
-        profile = await self.app.getBotProfile()
+        profile = await self.app.get_bot_profile()
         query = AccountTable.insert().values(accountID=self.app.account, name=profile.nickname)
         await self.database.execute(query)
 
     async def addBotMember(self, group_id: int):
         """往数据库中添加 Bot 自身在 Group 中的的成员信息"""
-        group = await self.app.getGroup(group_id)
+        group = await self.app.get_group(group_id)
         if group is None:
             return
-        info = await self.app.getMemberProfile(self.app.account, group)
+        info = await self.app.get_member_profile(self.app.account, group)
         name = info.nickname
         query = MemberTable.select().where(
             MemberTable.c.accountID == self.app.account
@@ -118,7 +118,7 @@ class DataManager:
     async def updateAccountName(self, account: Union[Friend, Stranger, Member]):
         """自动检查 AccountName 是否变化，若变化则更新数据库"""
         if isinstance(account, Member):
-            profile = await account.getProfile()
+            profile = await account.get_profile()
             query = AccountTable.update().values(name=profile.nickname) \
                 .where(AccountTable.c.accountID == account.id) \
                 .where(AccountTable.c.name != profile.nickname)
@@ -138,7 +138,7 @@ class DataManager:
 
     async def updateBotAccountName(self):
         """自动检查 Bot 自身 nickname 是否变化，若变化则更新数据库"""
-        profile = await self.app.getBotProfile()
+        profile = await self.app.get_bot_profile()
         query = AccountTable.update().values(name=profile.nickname) \
             .where(AccountTable.c.accountID == self.app.account) \
             .where(AccountTable.c.name != profile.nickname)
@@ -146,10 +146,10 @@ class DataManager:
 
     async def updateBotMemberName(self, group_id: int):
         """自动检查 Bot 自身所在 Group 中的 name 是否变化，若变化则更新数据库"""
-        group = await self.app.getGroup(group_id)
+        group = await self.app.get_group(group_id)
         if group is None:
             return
-        info = await self.app.getMemberProfile(self.app.account, group)
+        info = await self.app.get_member_profile(self.app.account, group)
         name = info.nickname
         query = MemberTable.update().values(name=name) \
             .where(MemberTable.c.accountID == self.app.account) \
@@ -160,32 +160,32 @@ class DataManager:
         """往数据库中添加新 GroupMessage """
         query = GroupMessageTable.insert().values(senderID=message.sender.id,
                                                   groupID=message.sender.group.id,
-                                                  timestamp=message.messageChain.get(Source)[0].time.timestamp(),
-                                                  context=message.messageChain.asPersistentString())
+                                                  timestamp=message.message_chain.get(Source)[0].time.timestamp(),
+                                                  context=message.message_chain.as_persistent_string())
         await self.database.execute(query)
 
     async def addFriendMessage(self, message: FriendMessage):
         """往数据库中添加新 FriendMessage """
         query = FriendMessageTable.insert().values(senderID=message.sender.id,
                                                    friendID=message.sender.id,
-                                                   timestamp=message.messageChain.get(Source)[0].time.timestamp(),
-                                                   context=message.messageChain.asPersistentString())
+                                                   timestamp=message.message_chain.get(Source)[0].time.timestamp(),
+                                                   context=message.message_chain.as_persistent_string())
         await self.database.execute(query)
 
-    async def addBotGroupMessage(self, message: BotMessage, group_id: int):
+    async def addBotGroupMessage(self, message: ActiveGroupMessage, group_id: int):
         """往数据库中添加 由 Bot 自身发送的 GroupMessage """
         query = GroupMessageTable.insert().values(senderID=self.app.account,
                                                   groupID=group_id,
                                                   timestamp=time.time(),
-                                                  context=message.origin.asPersistentString())
+                                                  context=message.message_chain.as_persistent_string())
         await self.database.execute(query)
 
-    async def addBotFriendMessage(self, message: BotMessage, friend_id: int):
+    async def addBotFriendMessage(self, message: ActiveFriendMessage, friend_id: int):
         """往数据库中添加 由 Bot 自身发送的 FriendMessage """
         query = FriendMessageTable.insert().values(senderID=self.app.account,
                                                    friendID=friend_id,
                                                    timestamp=time.time(),
-                                                   context=message.origin.asPersistentString())
+                                                   context=message.message_chain.as_persistent_string())
         await self.database.execute(query)
 
     async def addSyncGroupMessage(self, message: GroupSyncMessage):
@@ -193,7 +193,7 @@ class DataManager:
         query = GroupMessageTable.insert().values(senderID=self.app.account,
                                                   groupID=message.subject.id,
                                                   timestamp=time.time(),
-                                                  context=message.messageChain.asPersistentString())
+                                                  context=message.message_chain.as_persistent_string())
         await self.database.execute(query)
 
     async def addSyncFriendMessage(self, message: FriendSyncMessage):
@@ -201,23 +201,23 @@ class DataManager:
         query = FriendMessageTable.insert().values(senderID=self.app.account,
                                                    friendID=message.subject.id,
                                                    timestamp=time.time(),
-                                                   context=message.messageChain.asPersistentString())
+                                                   context=message.message_chain.as_persistent_string())
         await self.database.execute(query)
 
     async def getGroupNameByID(self, group_id: int) -> str:
         """通过 groupID 获取群名"""
-        group = await self.app.getGroup(group_id)
+        group = await self.app.get_group(group_id)
         name = group.name
         return name
 
     async def getAccountNameByID(self, account_id: int) -> str:
         """通过 accountID 获取账号名"""
         if account_id == self.app.account:
-            profile = await self.app.getBotProfile()
+            profile = await self.app.get_user_profile(account_id)
             name = profile.nickname
         else:
             try:
-                profile = await self.app.getUserProfile(account_id)
+                profile = await self.app.get_user_profile(account_id)
                 name = profile.nickname
             except UnknownTarget:
                 name = "【无法获取的用户】"
@@ -248,7 +248,7 @@ class DataManager:
             group_name = await self.getGroupNameByID(group_id=group_id)
             timestamp = i[3]
             time = get_time_by_timestamp(timestamp)
-            message = MessageChain.fromPersistentString(i[4])
+            message = MessageChain.from_persistent_string(i[4])
             message_list.append(MessageContainer(time=time, timestamp=timestamp,
                                                  message=message, sender_id=sender_id, sender_name=sender_name,
                                                  group_id=group_id, group_name=group_name))
@@ -265,7 +265,7 @@ class DataManager:
             sender_name = await self.getAccountNameByID(account_id=sender_id)
             timestamp = i[2]
             time_ = get_time_by_timestamp(timestamp)
-            message = MessageChain.fromPersistentString(i[4])
+            message = MessageChain.from_persistent_string(i[4])
             message_list.append(MessageContainer(time=time_, timestamp=timestamp,
                                                  message=message, sender_id=sender_id, sender_name=sender_name,
                                                  group_id=None, group_name=None))

@@ -2,3 +2,12 @@ graia-ariadne
 graia-saya
 pyyaml
 prompt_toolkit
+Jinja2
+uvicorn
+Pillow
+httpx
+sanic
+SQLAlchemy
+databases
+loguru
+creart

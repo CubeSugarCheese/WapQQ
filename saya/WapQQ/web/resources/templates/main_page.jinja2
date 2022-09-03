@@ -13,14 +13,14 @@
     您的群聊：
     <br>
     {% for i in group_list %}
-        群：{{ i.name }}，跳转：<a href="/qq/group/{{ i.id }}">跳转</a>
+        群：{{ i.name }}，跳转：<a href="/group/{{ i.id }}">跳转</a>
         <br>
     {% endfor %}
     您的好友：
     <br>
     {% for i in friend_list %}
         好友：{{ i.nickname }}{% if not i.remark == '' %}({{ i.remark }}){% endif %},跳转：
-        <a href="/qq/friend/{{ i.id }}">跳转</a>
+        <a href="/friend/{{ i.id }}">跳转</a>
         <br>
     {% endfor %}
 </p>

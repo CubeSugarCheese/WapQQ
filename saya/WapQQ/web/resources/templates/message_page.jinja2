@@ -101,9 +101,9 @@
     {% endif %}
 
     <br>
-    <a href="/qq">返回主页</a>
+    <a href="/">返回主页</a>
 
-    <form method="post" action="/qq/send_{{ type }}_message/{{ id }}">
+    <form method="post" action="/send_{{ type }}_message/{{ id }}">
         消息:<br>
         <label>
             <input type="text" name="message">
@@ -125,13 +125,13 @@
                     {%- if j.type == "Plain" -%}
                         {{ j.text }}
                     {%- elif j.type == "Image" -%}
-                        {% if use_image_proxy %}<img src="/qq/image_proxy?url={{ j["url"] }}" alt="图片" class="chat-image">{% else %}<img src="{{ j["url"] }}" alt="图片" class="chat-image">{% endif %}
+                        {% if use_image_proxy %}<img src="/image_proxy?url={{ j["url"] }}" alt="图片" class="chat-image">{% else %}<img src="{{ j["url"] }}" alt="图片" class="chat-image">{% endif %}
                     {%- elif j.type == "At" -%}
                         <span>@</span><span class="id">{{ j["target"] }}</span>
                     {%- elif j.type == "Quote" -%}
                         回复 {{ j["targetId"] }}
                     {%- elif j.type == "Face" -%}
-                        <img class="face" src="/qq/face/{{ j.faceId }}.png" alt="{{ j.asDisplay() }}">
+                        <img class="face" src="/face/{{ j.faceId }}.png" alt="{{ j.asDisplay() }}">
                     {%- elif j.type == "MarketFace" -%}
                         {{ j.asDisplay() }}
                     {%- elif j.type == "Xml" -%}
@@ -159,13 +159,13 @@
             <br>
         {% endfor %}
     {% endif %}
-         <p>【<a href="/qq/{{ type }}/{{ id }}">首页</a>|
-            {%- if page > 1 %}<a href="/qq/{{ type }}/{{ id }}?page={{ page - 1 }}">上一页</a>|{% endif %}
+         <p>【<a href="/{{ type }}/{{ id }}">首页</a>|
+            {%- if page > 1 %}<a href="/{{ type }}/{{ id }}?page={{ page - 1 }}">上一页</a>|{% endif %}
             <span>第 {{ page }} 页|</span>
-            {%- if page < max_page %}<a href="/qq/{{ type }}/{{ id }}?page={{ page + 1 }}">下一页</a>|{% endif %}
-            <a href="/qq/{{ type }}/{{ id }}?page={{ max_page }}">末页</a>】
+            {%- if page < max_page %}<a href="/{{ type }}/{{ id }}?page={{ page + 1 }}">下一页</a>|{% endif %}
+            <a href="/{{ type }}/{{ id }}?page={{ max_page }}">末页</a>】
          </p>
-    <form method="post" action="/qq/send_{{ type }}_message/{{ id }}">
+    <form method="post" action="/send_{{ type }}_message/{{ id }}">
         消息:<br>
         <label>
             <input type="text" name="message">
@@ -175,7 +175,7 @@
     </form>
 
 {% elif status == 'error' %}
-    ERROR发生！您选择的好友/群聊可能不正确！<a href="/qq">返回主页</a>
+    ERROR发生！您选择的好友/群聊可能不正确！<a href="/">返回主页</a>
 {% endif %}
 
 </body>

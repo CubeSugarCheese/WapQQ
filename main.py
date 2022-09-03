@@ -4,8 +4,9 @@ import os
 import sys
 from pathlib import Path
 
+from creart import create
 from graia.ariadne.app import Ariadne
-from graia.ariadne.model import MiraiSession
+from graia.ariadne.connection.config import config, WebsocketClientConfig, HttpClientConfig
 from graia.broadcast import Broadcast
 from graia.broadcast.interrupt import InterruptControl
 from graia.saya import Saya
@@ -13,7 +14,6 @@ from graia.saya.builtins.broadcast import BroadcastBehaviour
 from loguru import logger
 from prompt_toolkit.patch_stdout import StdoutProxy
 
-from config import appConfig
 
 LOGPATH = Path("./logs")
 LOGPATH.mkdir(exist_ok=True)
@@ -32,14 +32,14 @@ logger.info("Bot is starting...")
 ignore = ["__init__.py", "__pycache__"]
 
 loop = asyncio.new_event_loop()
-bcc = Broadcast(loop=loop)
+bcc = create(Broadcast)
 inc = InterruptControl(bcc)
 app = Ariadne(
-    broadcast=bcc,
-    connect_info=MiraiSession(
-        host=appConfig.host,
-        account=appConfig.account,
-        verify_key=appConfig.verify_key,
+    connection=config(
+        1710564415,  # 你的机器人的 qq 号
+        "asnfhsudhun",  # 填入你的 mirai-api-http 配置中的 verifyKey
+        HttpClientConfig(host="http://127.0.0.1:10088"),
+        WebsocketClientConfig(host="http://127.0.0.1:10088"),
     ),
 )
 saya = Saya(bcc)
@@ -123,6 +123,7 @@ def rewrite_ariadne_logger(debug: bool = False, graia_console: bool = False):
         diagnose=True,  # 异常跟踪是否应显示变量值以简化调试。这应该在生产中设置为 False 以避免泄露敏感数据。
         enqueue=True,  # 要记录的消息是否应在到达接收器之前首先通过多进程安全队列。这在通过多个进程记录到文件时很有用。这也具有使日志记录调用非阻塞的优点。
     )
+
 
 rewrite_logging_logger('uvicorn.error')
 rewrite_logging_logger('uvicorn.access')

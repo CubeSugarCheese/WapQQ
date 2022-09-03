@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List
 
 from PIL import Image, ImageSequence, UnidentifiedImageError
-from graia.ariadne import get_running
+from graia.ariadne import Ariadne
 from graia.ariadne.message.chain import MessageChain
 from httpx import AsyncClient
 from httpx import RequestError
@@ -19,28 +19,28 @@ current_path = Path(__file__).parents[0]
 sanic = Sanic("WapQQ")
 
 
-@sanic.get("/qq")
+@sanic.get("/")
 async def show_main_page(request: Request) -> HTTPResponse:
-    application = get_running()
+    application: Ariadne = Ariadne.current()
     account = application.account
-    group_list = await application.getGroupList()
-    friend_list = await application.getFriendList()
+    group_list = await application.get_group_list()
+    friend_list = await application.get_friend_list()
     template = await render_template("main_page.jinja2",
                                      account=account, group_list=group_list, friend_list=friend_list)
     return HTTPResponse(template, content_type='text/html')
 
 
-@sanic.get("/qq/send_error")
+@sanic.get("/send_error")
 async def show_send_error_page(request: Request):
     template = await render_template("send_error.jinja2")
     return html(template)
 
 
-@sanic.get("/qq/group/<group_id:int>")
+@sanic.get("/group/<group_id:int>")
 async def show_group_page(request: Request, group_id: int) -> HTTPResponse:
-    application = get_running()
+    application: Ariadne = Ariadne.current()
     page = int(request.args.get("page")) if request.args.get("page") is not None else 1
-    group_list = await application.getGroupList()
+    group_list = await application.get_group_list()
     status = "error"
     current_group = None
     for group in group_list:
@@ -59,11 +59,11 @@ async def show_group_page(request: Request, group_id: int) -> HTTPResponse:
     return html(template)
 
 
-@sanic.get("/qq/friend/<friend_id:int>")
+@sanic.get("/friend/<friend_id:int>")
 async def show_friend_page(request: Request, friend_id: int) -> HTTPResponse:
-    application = get_running()
+    application: Ariadne = Ariadne.current()
     page = int(request.args.get("page")) if request.args.get("page") is not None else 1
-    friend_list = await application.getFriendList()
+    friend_list = await application.get_friend_list()
     status = "error"
     current_friend = None
     for friend in friend_list:
@@ -82,35 +82,35 @@ async def show_friend_page(request: Request, friend_id: int) -> HTTPResponse:
     return html(template)
 
 
-@sanic.post("/qq/send_group_message/<group_id:int>")
+@sanic.post("/send_group_message/<group_id:int>")
 async def send_group_message(request: Request, group_id: int):
-    application = get_running()
+    application: Ariadne = Ariadne.current()
     try:
         message: str = request.form["message"]
     except KeyError:
-        return redirect("/qq/send_error")
-    bot_message = await application.sendGroupMessage(group_id, MessageChain.create(message))
+        return redirect("/send_error")
+    bot_message = await application.send_group_message(group_id, MessageChain(message))
     await dataManager.addBotGroupMessage(bot_message, group_id)
     await dataManager.addBotMember(group_id)
     await dataManager.updateBotMemberName(group_id)
-    return redirect(f"/qq/group/{group_id}", status=303)
+    return redirect(f"/group/{group_id}")
 
 
-@sanic.post("/qq/send_friend_message/<friend_id:int>")
+@sanic.post("/send_friend_message/<friend_id:int>")
 async def send_friend_message(request: Request, friend_id: int):
-    application = get_running()
+    application: Ariadne = Ariadne.current()
     try:
         message: str = request.form["message"]
     except KeyError:
-        return redirect("/qq/send_error")
-    bot_message = await application.sendFriendMessage(friend_id, MessageChain.create(message))
+        return redirect("/send_error")
+    bot_message = await application.send_friend_message(friend_id, MessageChain(message))
     await dataManager.addBotFriendMessage(bot_message, friend_id)
     await dataManager.addBotAccount()
     await dataManager.updateBotAccountName()
-    return redirect(f"/qq/friend/{friend_id}", status=303)
+    return redirect(f"/friend/{friend_id}")
 
 
-@sanic.get(r"/qq/image_proxy")
+@sanic.get("/image_proxy")
 async def image_proxy(request: Request):
     url = request.args.get("url")
     try:
@@ -122,8 +122,7 @@ async def image_proxy(request: Request):
     except UnidentifiedImageError:
         return HTTPResponse("content not support, must image", status=403)
     img_bytes = await asyncio.to_thread(lambda: thumbnail_image(image))
-    img_format = Image.open(img_bytes).get_format_mimetype()
-    return raw(img_bytes.getvalue(), content_type=img_format)
+    return raw(img_bytes.getvalue(), content_type="image/*")
 
 
 def thumbnail_dynamic_image(image: Image.Image, img_format: str = "GIF") -> BytesIO:
