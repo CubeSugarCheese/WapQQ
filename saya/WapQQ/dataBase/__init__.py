@@ -263,7 +263,7 @@ class DataManager:
         for i in result:
             sender_id = i[1]
             sender_name = await self.getAccountNameByID(account_id=sender_id)
-            timestamp = i[2]
+            timestamp = i[3]
             time_ = get_time_by_timestamp(timestamp)
             message = MessageChain.from_persistent_string(i[4])
             message_list.append(MessageContainer(time=time_, timestamp=timestamp,
