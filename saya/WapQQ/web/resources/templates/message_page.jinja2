@@ -129,9 +129,9 @@
                     {%- elif j.type == "At" -%}
                         <span>@</span><span class="id">{{ j["target"] }}</span>
                     {%- elif j.type == "Quote" -%}
-                        回复 {{ j["targetId"] }}
+                        回复 {{ j["target_id"] }}
                     {%- elif j.type == "Face" -%}
-                        <img class="face" src="/face/{{ j.faceId }}.png" alt="{{ j.display }}">
+                        <img class="face" src="/face/{{ j.face_id }}.png" alt="{{ j.display }}">
                     {%- elif j.type == "MarketFace" -%}
                         {{ j.display }}
                     {%- elif j.type == "Xml" -%}
