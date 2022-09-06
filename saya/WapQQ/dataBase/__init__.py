@@ -118,10 +118,15 @@ class DataManager:
     async def updateAccountName(self, account: Union[Friend, Stranger, Member]):
         """自动检查 AccountName 是否变化，若变化则更新数据库"""
         if isinstance(account, Member):
-            profile = await account.get_profile()
-            query = AccountTable.update().values(name=profile.nickname) \
-                .where(AccountTable.c.accountID == account.id) \
-                .where(AccountTable.c.name != profile.nickname)
+            try:
+                profile = await account.get_profile()
+                query = AccountTable.update().values(name=profile.nickname) \
+                    .where(AccountTable.c.accountID == account.id) \
+                    .where(AccountTable.c.name != profile.nickname)
+            except UnknownTarget:
+                query = AccountTable.update().values(name=account.name) \
+                    .where(AccountTable.c.accountID == account.id) \
+                    .where(AccountTable.c.name != account.name)
         else:
             query = AccountTable.update().values(name=account.nickname) \
                 .where(AccountTable.c.accountID == account.id) \
