@@ -17,6 +17,7 @@ from ..dataBase import dataManager
 
 current_path = Path(__file__).parents[0]
 sanic = Sanic("WapQQ")
+sanic.static("/face", current_path/"resources"/"qq-face")
 
 
 @sanic.get("/")
