@@ -64,16 +64,6 @@
             word-break: break-all;
         }
 
-        .chat-block-self .arrow {
-            position: absolute;
-            top: 6px;
-            right: -16px;
-            width: 0;
-            height: 0;
-            font-size: 0;
-            border: solid 8px;
-            border-color: rgb(18, 183, 245) rgb(255, 253, 251) rgb(255, 253, 251) rgb(18, 183, 245);
-        }
 
         .chat-sender-head {
             display:inline-block;
@@ -120,10 +110,12 @@
             <div class="{% if i.sender_id != account %}chat-sender{% else %}chat-sender-self{% endif %}">
                 {{ i.sender_name }}(<span class="id">{{ i.sender_id }}</span>) {{ i.time }}
             </div>
-            <div class="{% if i.sender_id != account %}chat-block{% else %}chat-block-self{% endif %}"><div class="arrow"></div>
+            <div class="{% if i.sender_id != account %}chat-block{% else %}chat-block-self{% endif %}">
                 {%- for j in i.message -%}
                     {%- if j.type == "Plain" -%}
                         {{ j.text }}
+                    {%- elif j.type == "Source" -%}
+                        <!-- Source Message Type -->
                     {%- elif j.type == "Image" -%}
                         {% if use_image_proxy %}<img src="/image_proxy?url={{ j["url"] }}" alt="图片" class="chat-image">{% else %}<img src="{{ j["url"] }}" alt="图片" class="chat-image">{% endif %}
                     {%- elif j.type == "At" -%}

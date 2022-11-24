@@ -166,7 +166,7 @@ class DataManager:
         query = GroupMessageTable.insert().values(senderID=message.sender.id,
                                                   groupID=message.sender.group.id,
                                                   timestamp=message.message_chain.get(Source)[0].time.timestamp(),
-                                                  context=message.message_chain.as_persistent_string())
+                                                  context=message.message_chain.json())
         await self.database.execute(query)
 
     async def addFriendMessage(self, message: FriendMessage):
@@ -174,7 +174,7 @@ class DataManager:
         query = FriendMessageTable.insert().values(senderID=message.sender.id,
                                                    friendID=message.sender.id,
                                                    timestamp=message.message_chain.get(Source)[0].time.timestamp(),
-                                                   context=message.message_chain.as_persistent_string())
+                                                   context=message.message_chain.json())
         await self.database.execute(query)
 
     async def addBotGroupMessage(self, message: ActiveGroupMessage, group_id: int):
@@ -182,7 +182,7 @@ class DataManager:
         query = GroupMessageTable.insert().values(senderID=self.app.account,
                                                   groupID=group_id,
                                                   timestamp=time.time(),
-                                                  context=message.message_chain.as_persistent_string())
+                                                  context=message.message_chain.json())
         await self.database.execute(query)
 
     async def addBotFriendMessage(self, message: ActiveFriendMessage, friend_id: int):
@@ -190,7 +190,7 @@ class DataManager:
         query = FriendMessageTable.insert().values(senderID=self.app.account,
                                                    friendID=friend_id,
                                                    timestamp=time.time(),
-                                                   context=message.message_chain.as_persistent_string())
+                                                   context=message.message_chain.json())
         await self.database.execute(query)
 
     async def addSyncGroupMessage(self, message: GroupSyncMessage):
@@ -198,7 +198,7 @@ class DataManager:
         query = GroupMessageTable.insert().values(senderID=self.app.account,
                                                   groupID=message.subject.id,
                                                   timestamp=time.time(),
-                                                  context=message.message_chain.as_persistent_string())
+                                                  context=message.message_chain.json())
         await self.database.execute(query)
 
     async def addSyncFriendMessage(self, message: FriendSyncMessage):
@@ -206,7 +206,7 @@ class DataManager:
         query = FriendMessageTable.insert().values(senderID=self.app.account,
                                                    friendID=message.subject.id,
                                                    timestamp=time.time(),
-                                                   context=message.message_chain.as_persistent_string())
+                                                   context=message.message_chain.json())
         await self.database.execute(query)
 
     async def getGroupNameByID(self, group_id: int) -> str:
@@ -253,7 +253,7 @@ class DataManager:
             group_name = await self.getGroupNameByID(group_id=group_id)
             timestamp = i[3]
             time = get_time_by_timestamp(timestamp)
-            message = MessageChain.from_persistent_string(i[4])
+            message = MessageChain.parse_raw(i[4])
             message_list.append(MessageContainer(time=time, timestamp=timestamp,
                                                  message=message, sender_id=sender_id, sender_name=sender_name,
                                                  group_id=group_id, group_name=group_name))
@@ -270,7 +270,7 @@ class DataManager:
             sender_name = await self.getAccountNameByID(account_id=sender_id)
             timestamp = i[3]
             time_ = get_time_by_timestamp(timestamp)
-            message = MessageChain.from_persistent_string(i[4])
+            message = MessageChain.parse_raw(i[4])
             message_list.append(MessageContainer(time=time_, timestamp=timestamp,
                                                  message=message, sender_id=sender_id, sender_name=sender_name,
                                                  group_id=None, group_name=None))
