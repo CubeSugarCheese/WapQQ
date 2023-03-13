@@ -1,4 +1,4 @@
-import time
+import time as time_module
 from typing import Optional, Union, List
 from pathlib import Path
 
@@ -6,7 +6,6 @@ from databases import Database, core
 from graia.ariadne.app import Ariadne
 from graia.ariadne.event.message import GroupMessage, FriendMessage, GroupSyncMessage, FriendSyncMessage, \
     ActiveFriendMessage, ActiveGroupMessage
-from graia.ariadne.message.element import Source
 from graia.ariadne.model import Group, Friend, Member, Stranger
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.exception import UnknownTarget
@@ -165,7 +164,7 @@ class DataManager:
         """往数据库中添加新 GroupMessage """
         query = GroupMessageTable.insert().values(senderID=message.sender.id,
                                                   groupID=message.sender.group.id,
-                                                  timestamp=message.message_chain.get(Source)[0].time.timestamp(),
+                                                  timestamp=message.source.time.timestamp(),
                                                   context=message.message_chain.json())
         await self.database.execute(query)
 
@@ -173,7 +172,7 @@ class DataManager:
         """往数据库中添加新 FriendMessage """
         query = FriendMessageTable.insert().values(senderID=message.sender.id,
                                                    friendID=message.sender.id,
-                                                   timestamp=message.message_chain.get(Source)[0].time.timestamp(),
+                                                   timestamp=message.source.time.timestamp(),
                                                    context=message.message_chain.json())
         await self.database.execute(query)
 
@@ -181,7 +180,7 @@ class DataManager:
         """往数据库中添加 ActiveGroupMessage """
         query = GroupMessageTable.insert().values(senderID=self.app.account,
                                                   groupID=group_id,
-                                                  timestamp=time.time(),
+                                                  timestamp=time_module.time(),
                                                   context=message.message_chain.json())
         await self.database.execute(query)
 
@@ -189,7 +188,7 @@ class DataManager:
         """往数据库中添加 ActiveFriendMessage """
         query = FriendMessageTable.insert().values(senderID=self.app.account,
                                                    friendID=friend_id,
-                                                   timestamp=time.time(),
+                                                   timestamp=time_module.time(),
                                                    context=message.message_chain.json())
         await self.database.execute(query)
 
@@ -197,7 +196,7 @@ class DataManager:
         """往数据库中添加 GroupSyncMessage """
         query = GroupMessageTable.insert().values(senderID=self.app.account,
                                                   groupID=message.subject.id,
-                                                  timestamp=time.time(),
+                                                  timestamp=time_module.time(),
                                                   context=message.message_chain.json())
         await self.database.execute(query)
 
@@ -205,7 +204,7 @@ class DataManager:
         """往数据库中添加 FriendSyncMessage """
         query = FriendMessageTable.insert().values(senderID=self.app.account,
                                                    friendID=message.subject.id,
-                                                   timestamp=time.time(),
+                                                   timestamp=time_module.time(),
                                                    context=message.message_chain.json())
         await self.database.execute(query)
 
