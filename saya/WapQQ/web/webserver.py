@@ -18,8 +18,8 @@ from ..dataBase import dataManager
 
 current_path = Path(__file__).parents[0]
 sanic = Sanic("WapQQ")
-sanic.static("/face", current_path / "resources" / "qq-face")
-sanic.static("/css", current_path / "resources" / "css")
+sanic.static("/face", current_path / "resources" / "qq-face", name="qq_face")
+sanic.static("/css", current_path / "resources" / "css", name="css")
 
 
 @sanic.get("/")
