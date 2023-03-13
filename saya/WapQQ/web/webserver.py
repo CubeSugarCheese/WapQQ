@@ -3,6 +3,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import List
 
+from PIL.ImageFile import ImageFile
 from PIL import Image, ImageSequence, UnidentifiedImageError
 from graia.ariadne import Ariadne
 from graia.ariadne.message.chain import MessageChain
@@ -17,7 +18,8 @@ from ..dataBase import dataManager
 
 current_path = Path(__file__).parents[0]
 sanic = Sanic("WapQQ")
-sanic.static("/face", current_path/"resources"/"qq-face")
+sanic.static("/face", current_path / "resources" / "qq-face")
+sanic.static("/css", current_path / "resources" / "css")
 
 
 @sanic.get("/")
@@ -117,18 +119,35 @@ async def image_proxy(request: Request):
     try:
         async with AsyncClient() as client:
             r = await client.get(url)
-        image = Image.open(BytesIO(r.content))
+        image: ImageFile = Image.open(BytesIO(r.content))
+        mimetype = image.get_format_mimetype()
     except RequestError:
         return HTTPResponse("invalid url", status=403)
     except UnidentifiedImageError:
         return HTTPResponse("content not support, must image", status=403)
     img_bytes = await asyncio.to_thread(lambda: thumbnail_image(image))
-    return raw(img_bytes.getvalue(), content_type="image/*")
+    return raw(img_bytes.getvalue(), content_type=mimetype)
 
 
-def thumbnail_dynamic_image(image: Image.Image, img_format: str = "GIF") -> BytesIO:
-    imgs: List[Image.Image] = [frame.copy() for frame in ImageSequence.Iterator(image)]
-    img_frames: List[Image.Image] = []
+@sanic.get("/market_face/<face_id:int>")
+async def market_face_proxy(request: Request, face_id: int):
+    name = request.args.get("name")
+    if name is None:
+        return HTTPResponse("illegal param", status=403)
+    async with AsyncClient() as client:
+        meta = (await client.get(f"https://i.gtimg.cn/club/item/parcel/{face_id % 10}/{face_id}_android.json")).json()
+        for i in meta["imgs"]:
+            if i["name"] == name:
+                height: int = i["wHeightInPhone"]
+                width: int = i["wWidthInPhone"]
+                item_id: str = i["item_id"]
+                face_url = f"https://i.gtimg.cn/club/item/parcel/item/{item_id[:2]}/{item_id}/{height}x{width}.png"
+                return redirect(face_url)
+
+
+def thumbnail_dynamic_image(image: ImageFile, img_format: str = "GIF") -> BytesIO:
+    imgs: List[ImageFile] = [frame.copy() for frame in ImageSequence.Iterator(image)]
+    img_frames: List[ImageFile] = []
     for i in imgs:
         i.thumbnail((max_width, max_height), Image.ANTIALIAS)
         img_frames.append(i)
@@ -146,7 +165,7 @@ def thumbnail_dynamic_image(image: Image.Image, img_format: str = "GIF") -> Byte
     return after_image
 
 
-def thumbnail_image(image: Image.Image) -> BytesIO:
+def thumbnail_image(image: ImageFile) -> BytesIO:
     after_image = BytesIO()
     if image.mode == "P":  # ['1', 'L', 'I', 'F', 'P', 'RGB', 'RGBA', 'CMYK', 'YCbCr' ]
         # Gif

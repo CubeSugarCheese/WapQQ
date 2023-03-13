@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from jinja2 import FileSystemLoader, Environment
+from htmlmin import minify
 from uvicorn.server import Server
 
 current_path = Path(__file__).parents[0]
@@ -23,4 +24,5 @@ async def render_template(file_name: str, **kwargs) -> str:
     environment = await _build_env()
     template = environment.get_template(file_name)
     rendered_template = await template.render_async(**kwargs)
-    return rendered_template
+    min_html = minify(rendered_template)
+    return min_html

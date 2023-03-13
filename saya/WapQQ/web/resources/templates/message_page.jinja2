@@ -1,93 +1,19 @@
+{% import "macro.jinja2" as macro %}
 <!DOCTYPE html>
 <html lang="zh" style="background-color: rgb(255,253,251)">
 <head>
-    <title>WapQQ({% if type == 'friend' %}好友:{{ friend_name }}{% elif type == 'group' %}群:{{ group_name }}){% endif %})</title>
+    <title>WapQQ({% if type == "friend" %}好友:{{ friend_name }}{% elif type == "group" %}群:{{ group_name }}){% endif %})</title>
     <meta charset="utf-8">
     <meta name="referrer" content="never">
-    <style>
-        .chat-sender {
-            display:inline-block;
-            color: rgb(42, 0, 255);
-        }
-
-        .id {
-            color: #579ffb;
-        }
-
-        .chat-image {
-            max-width: 200px;
-        }
-
-        .chat-block {
-            white-space: pre-line;
-            position: relative;
-            left: 24px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: rgb(229, 227, 225);
-            padding: 10px;
-            min-height: 16px;
-            max-width: 600px;
-            width:fit-content;
-            word-break: break-all;
-        }
-
-        .chat-block .arrow {
-            position: absolute;
-            top: 6px;
-            left: -16px;
-            width: 0;
-            height: 0;
-            font-size: 0;
-            border: solid 8px;
-            border-color: rgb(229, 227, 225) rgb(229, 227, 225) rgb(255, 253, 251) rgb(255, 253, 251);
-        }
-
-        .chat-sender-self {
-            display:inline-block;
-            text-align: left;
-            color: rgb(0, 128, 64);
-        }
-
-        .chat-block-self {
-            white-space: pre-line;
-            text-align: left;
-            position: relative;
-            left: 24px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: rgb(18, 183, 245);
-            padding: 10px;
-            min-height: 16px;
-            max-width: 600px;
-            width:fit-content;
-            word-break: break-all;
-        }
-
-
-        .chat-sender-head {
-            display:inline-block;
-            vertical-align: auto;
-            border-radius: 30px;
-            width:35px;
-            height:35px;
-        }
-
-        .face {
-            width: 25px;
-            height: 25px;
-            vertical-align: text-bottom;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/global.css">
 </head>
 
 <body>
-{% import "macro.jinja2" as macro %}
-{% if status == 'ok' %}
+{% if status == "ok" %}
 
-    {% if type == 'group' %}
+    {% if type == "group" %}
         群：{{ group_name }}
-    {% elif type == 'friend' %}
+    {% elif type == "friend" %}
         好友：{{ friend_name }}
     {% endif %}
 
@@ -112,50 +38,15 @@
                 {{ i.sender_name }}(<span class="id">{{ i.sender_id }}</span>) {{ i.time }}
             </div>
             <div class="{% if i.sender_id != account %}chat-block{% else %}chat-block-self{% endif %}">
-                {%- for j in i.message -%}
-                    {%- if j.type == "Plain" -%}
-                        {{ j.text }}
-                    {%- elif j.type == "Source" -%}
-                        <!-- Source Message Type -->
-                    {%- elif j.type == "Image" -%}
-                        {% if use_image_proxy %}<img src="/image_proxy?url={{ j["url"] }}" alt="图片" class="chat-image">{% else %}<img src="{{ j["url"] }}" alt="图片" class="chat-image">{% endif %}
-                    {%- elif j.type == "At" -%}
-                        <span>@</span><span class="id">{{ j["target"] }}</span>
-                    {%- elif j.type == "Quote" -%}
-                        {{ macro.quote_message(j["sender_id"]) }}
-                    {%- elif j.type == "Face" -%}
-                        <img class="face" src="/face/{{ j.face_id }}.png" alt="{{ j.display }}">
-                    {%- elif j.type == "MarketFace" -%}
-                        {{ j.display }}
-                    {%- elif j.type == "Xml" -%}
-                        {{ j.display }}<br>
-                        {{ j.xml }}
-                    {%- elif j.type == "Json" -%}
-                        {{ j.display }}<br>
-                        {{ j.Json }}
-                    {%- elif j.type == "App" -%}
-                        {{ j.display }}<br>
-                        {{ j.content }}
-                    {%- elif j.type == "MusicShare" -%}
-                        {{ j.display }}
-                    {%- elif j.type == "Dice" -%}
-                        {{ j.display }}
-                    {%- elif j.type == "File" -%}
-                        {{ j.display }}
-                    {%- elif j.type == "Forward" -%}
-                        {{ macro.inner_forward_message(j, use_image_proxy) }}
-                    {%- else -%}
-                        {{ j.type }}<br>
-                        {{ j.display }}
-                    {%- endif %}
-                {%- endfor %}</div>
+                {{ macro.message(i.message, use_image_proxy) }}
+            </div>
             <br>
         {% endfor %}
     {% endif %}
          <p>【<a href="/{{ type }}/{{ id }}">首页</a>|
-            {%- if page > 1 %}<a href="/{{ type }}/{{ id }}?page={{ page - 1 }}">上一页</a>|{% endif %}
+            {% if page > 1 %}<a href="/{{ type }}/{{ id }}?page={{ page - 1 }}">上一页</a>|{% endif %}
             <span>第 {{ page }} 页|</span>
-            {%- if page < max_page %}<a href="/{{ type }}/{{ id }}?page={{ page + 1 }}">下一页</a>|{% endif %}
+            {% if page < max_page %}<a href="/{{ type }}/{{ id }}?page={{ page + 1 }}">下一页</a>|{% endif %}
             <a href="/{{ type }}/{{ id }}?page={{ max_page }}">末页</a>】
          </p>
     <form method="post" action="/send_{{ type }}_message/{{ id }}">
@@ -167,7 +58,7 @@
         <input type="submit" value="发送">
     </form>
 
-{% elif status == 'error' %}
+{% elif status == "error" %}
     ERROR发生！您选择的好友/群聊可能不正确！<a href="/">返回主页</a>
 {% endif %}
 

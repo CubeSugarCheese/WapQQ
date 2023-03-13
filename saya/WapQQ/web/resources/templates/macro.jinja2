@@ -1,49 +1,62 @@
+{% macro text(s) %}
+    {% set list1 = s.split("\n") %}
+    {% for item in list1 %}
+    {{ item }}
+        {% if not loop.last %}
+        <br/>
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+
 {% macro quote_message(sender_id) %}
     回复 <span class="id">{{ sender_id }}</span>：
 {% endmacro %}
 
-{% macro inner_forward_message(message, use_image_proxy) %}
-    <div class="element-forward">
-        {%- for i in message -%}
-            {%- if i.type == "Plain" -%}
-                {{ i.text }}
-            {%- elif i.type == "Source" -%}
-                <!-- Source Message Type -->
-            {%- elif i.type == "Image" -%}
-                {% if use_image_proxy %}
-                    <img src="/image_proxy?url={{ i["url"] }}" alt="图片" class="chat-image">
-                {% else %}
-                    <img src="{{ i["url"] }}" alt="图片" class="chat-image">
-                {% endif %}
-            {%- elif i.type == "At" -%}
-                <span>@</span><span class="id">{{ i["target"] }}</span>
-            {%- elif i.type == "Quote" -%}
-                {{ quote_message(i.sender_id) }}
-            {%- elif i.type == "Face" -%}
-                <img class="face" src="/face/{{ i.face_id }}.png" alt="{{ i.display }}">
-            {%- elif i.type == "MarketFace" -%}
-                {{ i.display }}
-            {%- elif i.type == "Xml" -%}
-                {{ i.display }}<br>
-                {{ i.xml }}
-            {%- elif i.type == "ison" -%}
-                {{ i.display }}<br>
-                {{ i.ison }}
-            {%- elif i.type == "App" -%}
-                {{ i.display }}<br>
-                {{ i.content }}
-            {%- elif i.type == "MusicShare" -%}
-                {{ i.display }}
-            {%- elif i.type == "Dice" -%}
-                {{ i.display }}
-            {%- elif i.type == "File" -%}
-                {{ i.display }}
-            {%- elif i.type == "Forward" -%}
-                [合并转发]该消息不支持查看
-            {%- else -%}
-                {{ i.type }}<br>
-                {{ i.display }}
-            {%- endif %}
-        {%- endfor %}
-    </div>
+{% macro element(e, use_image_proxy) %}
+    {% if e.type == "Plain" %}
+        {{ text(e.text) }}
+    {% elif e.type == "Source" %}
+        {# Source Element #}
+    {% elif e.type == "Image" %}
+        {% if use_image_proxy %}
+            <img src="/image_proxy?url={{ e["url"] | urlencode }}" alt="图片" class="chatimage">
+        {% else %}
+            <img src="{{ e["url"] }}" alt="图片" class="chatimage">
+        {% endif %}
+    {% elif e.type == "At" %}
+        <span>@</span><span class="id">{{ e["target"] }}</span>
+    {% elif e.type == "Quote" %}
+        {{ quote_message(e["sender_id"]) }}
+    {% elif e.type == "Face" %}
+        <img class="face" src="/face/{{ e.face_id }}.png" alt="{{ e.display }}">
+    {% elif e.type == "MarketFace" %}
+        <img class="market-face" src="/market_face/{{ e.face_id }}?name={{ e["name"][1:-1] }}" alt="{{ e.display }}">
+    {% elif e.type == "Xml" %}
+        {{ e.display }}<br>
+        {{ e.xml }}
+    {% elif e.type == "Json" %}
+        {{ e.display }}<br>
+        {{ e.Json }}
+    {% elif e.type == "App" %}
+        {{ e.display }}<br>
+        {{ e.content }}
+    {% elif e.type == "MusicShare" %}
+        {{ e.display }}
+    {% elif e.type == "Dice" %}
+        {{ e.display }}
+    {% elif e.type == "File" %}
+        {{ e.display }}
+    {% elif e.type == "Forward" %}
+        {#  Forward Element #}
+        {{ e.display }}
+    {% else %}
+        {{ e.type }}<br>
+        {{ e.display }}
+    {% endif %}
+{% endmacro %}
+
+{% macro message(message, use_image_proxy) %}
+    {% for i in message %}
+        {{ element(i, use_image_proxy) }}
+    {% endfor %}
 {% endmacro %}
