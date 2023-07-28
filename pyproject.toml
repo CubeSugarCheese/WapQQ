@@ -1,6 +1,3 @@
-[tool]
-[tool.pdm]
-
 [project]
 name = ""
 version = ""
@@ -10,20 +7,21 @@ authors = [
 ]
 requires-python = ">=3.9,<4.0"
 license = {text = "GNU Affero General Public License v3.0"}
-
-[project.dependencies]
-graia-ariadne = "^0.10.1"
-graia-saya = "^0.0.16"
-pyyaml = "^6.0"
-sqlalchemy = "^1.4.32"
-databases = { extras = ["sqlite"], version = "^0.5.5" }
-uvicorn = "^0.17.6"
-sanic = "^21.12.1"
-loguru = "^0.6.0"
-jinja2 = "^3.1.1"
-Pillow = "^9.0.1"
-httpx = "^0.22.0"
-prompt_toolkit = "^3.0.28"
-aiosqlite = "^0.17.0"
-pydantic = "^1.9.0"
-htmlmin= "^0.1.12"
+dependencies = [
+    "graia-ariadne>=0.11.5",
+    "graia-saya>=0.0.16",
+    "pyyaml>=6.0",
+    "sqlalchemy>=1.4.32",
+    "databases[sqlite]>=0.5.5",
+    "uvicorn>=0.17.6",
+    "loguru>=0.6.0",
+    "jinja2>=3.1.1",
+    "Pillow>=9.0.1",
+    "httpx>=0.22.0",
+    "prompt_toolkit>=3.0.28",
+    "aiosqlite>=0.17.0",
+    "pydantic>=1.9.0",
+    "htmlmin>=0.1.12",
+    "creart>=0.2",
+    "quart>=0.18.4",
+]

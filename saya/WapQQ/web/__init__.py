@@ -6,19 +6,16 @@ from uvicorn import Config
 
 from .config import host, port
 from .utils import NoSignalServer
-from .webserver import sanic
-
+from .webserver import quart
 
 task: Task
 server: NoSignalServer
 current_path = Path(__file__).parents[0]
 
-sanic.static("/qq/face", current_path/"resources"/"qq-face")
-
 
 async def launch_webserver():
     global server, task
-    server = NoSignalServer(Config(sanic, host=host, port=port, log_config=None, reload=False))
+    server = NoSignalServer(Config(quart, host=host, port=port, log_config=None, reload=False))
     task = asyncio.create_task(server.serve())
 
 

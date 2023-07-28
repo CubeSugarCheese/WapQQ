@@ -5,7 +5,7 @@
     <title>WapQQ({% if type == "friend" %}好友:{{ friend_name }}{% elif type == "group" %}群:{{ group_name }}){% endif %})</title>
     <meta charset="utf-8">
     <meta name="referrer" content="never">
-    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/resources/css/global.css">
 </head>
 
 <body>
@@ -21,10 +21,8 @@
     <a href="/">返回主页</a>
 
     <form method="post" action="/send_{{ type }}_message/{{ id }}">
-        消息:<br>
-        <label>
-            <input type="text" name="message">
-        </label>
+        <label for="message_front">消息:<br></label>
+        <input type="text" id="message_front" name="message">
         <br>
         <input type="submit" value="发送">
     </form>
@@ -50,10 +48,8 @@
             <a href="/{{ type }}/{{ id }}?page={{ max_page }}">末页</a>】
          </p>
     <form method="post" action="/send_{{ type }}_message/{{ id }}">
-        消息:<br>
-        <label>
-            <input type="text" name="message">
-        </label>
+        <label for="message_later">消息:<br></label>
+        <input type="text" id="message_later" name="message">
         <br>
         <input type="submit" value="发送">
     </form>

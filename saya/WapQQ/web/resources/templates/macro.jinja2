@@ -19,16 +19,16 @@
         {# Source Element #}
     {% elif e.type == "Image" %}
         {% if use_image_proxy %}
-            <img src="/image_proxy?url={{ e["url"] | urlencode }}" alt="图片" class="chatimage">
+            <img src="/image_proxy?url={{ e["url"] | urlencode }}" alt="图片" class="chat-image">
         {% else %}
-            <img src="{{ e["url"] }}" alt="图片" class="chatimage">
+            <img src="{{ e["url"] }}" alt="图片" class="chat-image">
         {% endif %}
     {% elif e.type == "At" %}
         <span>@</span><span class="id">{{ e["target"] }}</span>
     {% elif e.type == "Quote" %}
         {{ quote_message(e["sender_id"]) }}
     {% elif e.type == "Face" %}
-        <img class="face" src="/face/{{ e.face_id }}.png" alt="{{ e.display }}">
+        <img class="face" src="/resources/qq-face/{{ e.face_id }}.png" alt="{{ e.display }}">
     {% elif e.type == "MarketFace" %}
         <img class="market-face" src="/market_face/{{ e.face_id }}?name={{ e["name"][1:-1] }}" alt="{{ e.display }}">
     {% elif e.type == "Xml" %}
